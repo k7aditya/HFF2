@@ -107,7 +107,7 @@ class CustomBlock(nn.Module):
         out = self.conv1(x)
         out = self.bn1(out)
         out = self.relu(out)
-
+ 
         out = self.conv2(out)
         if self.downsample is not None:
             identity = self.downsample(x)
@@ -127,7 +127,7 @@ def custom_max(x, dim, keepdim=True):
 
 class HighFreqConv(nn.Module):
     def __init__(self, in_chs, out_chs, target_kernel):
-        super(HighFreqConv, self).__init__()
+        super(HighFreqConv, self).__init__() 
         self.conv = nn.Conv3d(in_chs, out_chs, kernel_size=3, padding=1, bias=False)
         self.init_weights(target_kernel)
 
@@ -177,6 +177,44 @@ class PositionalAttentionModule(nn.Module):
         att = self.conv(att)
         att = torch.sigmoid(att)
         return x * att
+
+
+# class SliceAttentionModule(nn.Module):
+#     def __init__(self, in_features, rate=4, uncertainty=True, rank=5):
+#         super(SliceAttentionModule, self).__init__()
+#         self.uncertainty = uncertainty
+#         self.rank = rank
+#         self.linear = nn.Sequential(
+#             nn.Linear(in_features=in_features, out_features=int(in_features * rate)),
+#             nn.ReLU(),
+#             nn.Linear(in_features=int(in_features * rate), out_features=in_features)
+#         )
+#         if uncertainty:
+#             self.non_linear = nn.ReLU()
+#             self.mean = nn.Linear(in_features=in_features, out_features=in_features)
+#             self.log_diag = nn.Linear(in_features=in_features, out_features=in_features)
+#             self.factor = nn.Linear(in_features=in_features, out_features=in_features * rank)
+
+#     def forward(self, x):
+#         max_x = custom_max(x, dim=(1, 3, 4), keepdim=False).unsqueeze(0)  # Adjusted for 3D
+#         avg_x = torch.mean(x, dim=(1, 3, 4), keepdim=False)  # Adjusted for 3D
+#         max_x = self.linear(max_x)
+#         avg_x = self.linear(avg_x)
+#         att = max_x + avg_x
+#         if self.uncertainty:
+#             eps = 1.0
+#             temp = self.non_linear(att)
+#             mean = self.mean(temp)
+#             diag = self.log_diag(temp).exp()
+#             diag = F.softplus(diag) + eps
+#             factor = self.factor(temp)
+#             factor = factor.view(1, -1, self.rank)
+#             dist = td.LowRankMultivariateNormal(loc=mean, cov_factor=factor, cov_diag=diag)
+#             att = dist.sample()
+#         att = torch.sigmoid(att).unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+#         return x * att
+
+
 class SliceAttentionModule(nn.Module):
     def __init__(self, in_features, rate=4, uncertainty=True, rank=5):
         super(SliceAttentionModule, self).__init__()
@@ -194,23 +232,65 @@ class SliceAttentionModule(nn.Module):
             self.factor = nn.Linear(in_features=in_features, out_features=in_features * rank)
 
     def forward(self, x):
-        max_x = custom_max(x, dim=(1, 3, 4), keepdim=False).unsqueeze(0)  # Adjusted for 3D
-        avg_x = torch.mean(x, dim=(1, 3, 4), keepdim=False)  # Adjusted for 3D
-        max_x = self.linear(max_x)
-        avg_x = self.linear(avg_x)
-        att = max_x + avg_x
+        # x: (B, C, D, H, W)
+        B, C, D, H, W = x.shape
+
+        # produce per-slice features (reduce over channel, height and width)
+        # max over channel -> (B, D, H, W)
+        max_x = x.max(dim=1)[0]
+        # max over H -> (B, D, W)
+        max_x = max_x.max(dim=2)[0]
+        # max over W -> (B, D)
+        max_x = max_x.max(dim=2)[0]
+
+        # average over channel, height, width -> (B, D)
+        avg_x = x.mean(dim=(1, 3, 4))  # (B, D)
+
+        max_x = self.linear(max_x)    # (B, D)
+        avg_x = self.linear(avg_x)    # (B, D)
+
+        att = max_x + avg_x           # (B, D)
+
         if self.uncertainty:
-            eps = 1.0
-            temp = self.non_linear(att)
-            mean = self.mean(temp)
-            diag = self.log_diag(temp).exp()
-            diag = F.softplus(diag) + eps
-            factor = self.factor(temp)
-            factor = factor.view(1, -1, self.rank)
-            dist = td.LowRankMultivariateNormal(loc=mean, cov_factor=factor, cov_diag=diag)
-            att = dist.sample()
-        att = torch.sigmoid(att).unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+            temp = self.non_linear(att)           # (B, D)
+            mean = self.mean(temp)                # (B, D)
+            # produce a positive diag and avoid tiny values
+            diag = F.softplus(self.log_diag(temp)) + 1e-3   # (B, D)
+            # produce factor and reshape -> (B, D, rank)
+            factor = self.factor(temp).view(B, D, self.rank)
+
+            # guard against NaN/Inf
+            mean = torch.nan_to_num(mean, nan=0.0, posinf=1e6, neginf=-1e6)
+            diag = torch.nan_to_num(diag, nan=1e-3, posinf=1e6, neginf=1e-6).clamp(min=1e-6)
+            factor = torch.nan_to_num(factor, nan=0.0, posinf=1e6, neginf=-1e6)
+
+            # try building the low-rank MVN, with jitter fallback
+            try:
+                dist = td.LowRankMultivariateNormal(loc=mean, cov_factor=factor, cov_diag=diag)
+                samp = dist.rsample()  # or .sample() depending on needs
+            except RuntimeError:
+                # cholesky failed -> add increasing jitter to diag and retry
+                samp = None
+                jitter = 1e-3
+                for _ in range(6):
+                    try:
+                        dist = td.LowRankMultivariateNormal(loc=mean, cov_factor=factor, cov_diag=diag + jitter)
+                        samp = dist.rsample()
+                        break
+                    except RuntimeError:
+                        jitter *= 10.0
+                if samp is None:
+                    # final fallback: diagonal gaussian (stable)
+                    eps = torch.randn_like(mean)
+                    samp = mean + torch.sqrt(diag) * eps
+
+            att = torch.sigmoid(samp).unsqueeze(1).unsqueeze(-1).unsqueeze(-1)  # (B,1,D,1,1)
+        else:
+            att = torch.sigmoid(att).unsqueeze(1).unsqueeze(-1).unsqueeze(-1)  # (B,1,D,1,1)
+
+        # broadcast multiply: x * att  -> (B, C, D, H, W) * (B,1,D,1,1)
         return x * att
+
 class FrequencyCrossAttention(nn.Module):
     def __init__(self, num_channels, num_slices , uncertainty=True, rank=5):
         super(FrequencyCrossAttention, self).__init__()
@@ -254,6 +334,9 @@ laplacian_3x3 = torch.tensor( [
              [0, 0, 0]]]
         , dtype=torch.float32)
 upsampled_laplacian=laplacian_3x3
+
+
+
 class HFFNet(nn.Module):
     def __init__(self, in_chs1,in_chs2,num_classes):
         super(HFFNet, self).__init__()
@@ -475,7 +558,7 @@ class HFFNet(nn.Module):
         decode_HF_1 = torch.cat((layer1_HF, decode_HF_2), dim=1)
         decode_HF_1 = self.l1_b2_2(decode_HF_1)
         decode_HF_1 = self.l1_b2_f(decode_HF_1)
-
+ 
         return decode_LF_1, decode_HF_1, decode_LF_3side, decode_HF_3side
 def hff_net(in_chs1,in_chs2, num_classes):
     return HFFNet(in_chs1,in_chs2, num_classes)

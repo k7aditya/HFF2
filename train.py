@@ -14,12 +14,37 @@ from config.train_test_config.train_test_config import print_train_loss, print_v
     print_val_eval, print_best,save_val_best_3d_m
 from config.warmup_config.warmup import GradualWarmupScheduler
 from loss.loss_function import segmentation_loss
-from model.HFF import HFFNet
+from model.HFFlite import HFFNet
 from loader.dataload3d import get_loaders
 from warnings import simplefilter
 
 simplefilter(action='ignore', category=FutureWarning)
 
+
+import sys
+
+class Logger(object):
+    def __init__(self, logfile):
+        self.terminal = sys.stdout
+        self.log = open(logfile, "a", buffering=1)  # line-buffered
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
+    def isatty(self):
+        return self.terminal.isatty()
+
+    def fileno(self):
+        return self.terminal.fileno()
+
+log_file = "training_loglite.txt"
+sys.stdout = Logger(log_file)
+sys.stderr = sys.stdout  # capture errors too
 
 def init_seeds(seed):
     torch.manual_seed(seed)
@@ -30,7 +55,6 @@ def init_seeds(seed):
     os.environ['PYTHONHASHSEED'] = str(0)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
-
 
 
 def make_label_mapping(dataset_name, class_type):
@@ -125,13 +149,13 @@ def important_weights_with_fisher(model, fisher_info,  std_multiplier=1):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_list', type=str, default='./brats19/2-train.txt')
-    parser.add_argument('--val_list', type=str, default='./brats19/2-val.txt')
+    parser.add_argument('--train_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-train.txt')
+    parser.add_argument('--val_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-val.txt')
     parser.add_argument('--path_trained_models', default='./result/checkpoints/hff')
     parser.add_argument(
     '--dataset_name',
     choices=['brats19','brats20','brats23men','msdbts'],
-    default='brats19',
+    default='brats20',
     help="Which BRATS/MSD dataset to use"
     )
     parser.add_argument(
@@ -142,8 +166,7 @@ if __name__ == '__main__':
     )
     # Brats 19/20/msd
     parser.add_argument('--selected_modal', nargs='+',
-                        default=['flair_L','t1_L','t1ce_L','t2_L','flair_H1', 'flair_H2','flair_H3','flair_H4', 't1_H1', 't1_H2','t1_H3','t1_H4', 't1ce_H1',
-                                 't1ce_H2','t1ce_H3','t1ce_H4', 't2_H1', 't2_H2','t2_H3','t2_H4'])
+                        default=['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4'])
     # Brats 23
     # parser.add_argument('--selected_modal', nargs='+',
     #                     default=['t2w_L', 't1n_L', 't1c_L', 't2f_L', 't2f_H1', 't2f_H2', 't2f_H3', 't2f_H4',
@@ -155,14 +178,14 @@ if __name__ == '__main__':
     parser.add_argument('--input2', default='H')
     parser.add_argument('--sup_mark', default='100', help='100')
     parser.add_argument('-b', '--batch_size', default=1, type=int)
-    parser.add_argument('-e', '--num_epochs', default=450, type=int)
+    parser.add_argument('-e', '--num_epochs', default=3, type=int) #default : 450
     parser.add_argument('-s', '--step_size', default=50, type=int)
     parser.add_argument('-l', '--lr', default=0.3, type=float)
     parser.add_argument('-g', '--gamma', default=0.55, type=float)
     parser.add_argument('-u', '--unsup_weight', default=15, type=float)
     parser.add_argument('--loss', default='dice', type=str)
     parser.add_argument('--loss2', default='ff', type=str)
-    parser.add_argument('-w', '--warm_up_duration', default=40)
+    parser.add_argument('-w', '--warm_up_duration', default=3) #default: 40
     parser.add_argument('--momentum', default=0.9, type=float)
     parser.add_argument('--wd', default=-5, type=float, help='weight decay pow')
     parser.add_argument('--queue_length', default=48, type=int)
@@ -170,7 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('--samples_per_volume_val', default=8, type=int) 
     parser.add_argument('-i', '--display_iter', default=1, type=int)
     parser.add_argument('-n', '--network', default='hff', type=str)
-    # 
+    
     
 
     args = parser.parse_args()
@@ -302,10 +325,7 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             outputs_train_1, outputs_train_2,side1,side2 = model(low_freq_inputs, high_freq_inputs)
             torch.cuda.empty_cache()
-    
          
-           
-
             loss_train_sup1 = criterion(outputs_train_1, mask_train)
             loss_train_sup2 = criterion(outputs_train_2, mask_train)
             loss_train_side1 = criterion(side1,mask_train)
