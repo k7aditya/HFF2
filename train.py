@@ -14,7 +14,7 @@ from config.train_test_config.train_test_config import print_train_loss, print_v
     print_val_eval, print_best,save_val_best_3d_m
 from config.warmup_config.warmup import GradualWarmupScheduler
 from loss.loss_function import segmentation_loss
-from model.HFFlite import HFFNet
+from model.HFF_MobileNetV3 import HFFNet
 from loader.dataload3d import get_loaders
 from warnings import simplefilter
 
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     parser.add_argument('--input2', default='H')
     parser.add_argument('--sup_mark', default='100', help='100')
     parser.add_argument('-b', '--batch_size', default=1, type=int)
-    parser.add_argument('-e', '--num_epochs', default=3, type=int) #default : 450
+    parser.add_argument('-e', '--num_epochs', default=150, type=int) #default : 450
     parser.add_argument('-s', '--step_size', default=50, type=int)
     parser.add_argument('-l', '--lr', default=0.3, type=float)
     parser.add_argument('-g', '--gamma', default=0.55, type=float)

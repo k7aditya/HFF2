@@ -42,12 +42,12 @@ def split(brain_dir, save_dir, n_split=3):
                 path = os.path.join(sample_dir, pid)
                 corrected_path = correct_path(path)
                 val_f.write(f"{corrected_path}\n")
-
+ 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--brain_dir', type=str, default='/home/mcga/phd/brain/')
-    parser.add_argument('--save_dir', type=str, default='./brats19')
+    parser.add_argument('--brain_dir', type=str, default='/teamspace/studios/this_studio/HFF/BraTS2020_TrainingData3/MICCAI_BraTS2020_TrainingData')
+    parser.add_argument('--save_dir', type=str, default='/teamspace/studios/this_studio/HFF/brats20')
     parser.add_argument('--n_split', type=int, default=3)
     parser.add_argument('--seed', type=int, default=9418)
     options = parser.parse_args()

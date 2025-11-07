@@ -59,9 +59,9 @@ def mask_to_class_indices(mask, mapping):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='HFF-Net 3D Inference')
-    parser.add_argument('--test_list', type=str,  help='Path to text file listing test volumes',default='./bratsxxx/x-val.txt')
-    parser.add_argument('--checkpoint', type=str,  help='Path to trained model checkpoint (.pth)',default=' yourpath/your_trained_hff-net.pth')
-    parser.add_argument('--dataset_name', choices=['brats19','brats20','brats23men','msdbts'], default='brats19')
+    parser.add_argument('--test_list', type=str,  help='Path to text file listing test volumes',default='/teamspace/studios/this_studio/HFF/brats20/2-val.txt')
+    parser.add_argument('--checkpoint', type=str,  help='Path to trained model checkpoint (.pth)',default='/teamspace/studios/this_studio/result/checkpoints/hff/brats20/all/hff-l=0.3-e=30-s=50-g=0.55-b=1-cw=15-w=3-100L-H/best_Result1_et_0.3390_tc_0.2583_wt_0.5082.pth')
+    parser.add_argument('--dataset_name', choices=['brats19','brats20','brats23men','msdbts'], default='brats20')
     parser.add_argument('--class_type', choices=['et','tc','wt','all'], default='et')
     parser.add_argument('--selected_modal', nargs='+', default=[
         'flair_L','t1_L','t1ce_L','t2_L',
@@ -79,6 +79,9 @@ if __name__ == '__main__':
     parser.add_argument('-b','--batch_size', type=int, default=1)
     parser.add_argument('-l','--loss', type=str, default='dice')
     parser.add_argument('--loss2', type=str, default='ff')
+    parser.add_argument('--output_dir', type=str, default='./outputs',
+                    help='directory where predictions / results will be written')
+
     args = parser.parse_args()
     
     init_seeds(42)
