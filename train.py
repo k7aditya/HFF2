@@ -42,7 +42,9 @@ class Logger(object):
     def fileno(self):
         return self.terminal.fileno()
 
-log_file = "training_loglite.txt"
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+log_file = f"training_log_{timestamp}.txt"
 sys.stdout = Logger(log_file)
 sys.stderr = sys.stdout  # capture errors too
 
