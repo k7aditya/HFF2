@@ -1,0 +1,40 @@
+{
+  "os":  "Windows-10-10.0.26100-SP0",
+  "python":  "CPython 3.10.11",
+  "startedAt":  "2025-09-07T09:48:08.272396Z",
+  "program":  "d:\\miniProj7thSem\\HFF\\train.py",
+  "codePath":  "train.py",
+  "codePathLocal":  "train.py",
+  "git":  {
+    "remote":  "https://github.com/VinyehShaw/HFF.git",
+    "commit":  "baca598c82a57b230224358bf617d86398a932b3"
+  },
+  "email":  "k7aditya@gmail.com",
+  "root":  "D:\\miniProj7thSem\\HFF",
+  "host":  "ADITYA",
+  "executable":  "C:\\Users\\k7adi\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+  "cpu_count":  10,
+  "cpu_count_logical":  16,
+  "gpu":  "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "215591735296",
+      "used":  "161520558080"
+    }
+  },
+  "memory":  {
+    "total":  "16831705088"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce RTX 3050 Laptop GPU",
+      "memoryTotal":  "4294967296",
+      "cudaCores":  2048,
+      "architecture":  "Ampere",
+      "uuid":  "GPU-e6cff3d5-7432-b2a1-51b8-129c39093653"
+    }
+  ],
+  "cudaVersion":  "12.6",
+  "writerId":  "49pouwdaaimbu4o5zq9xfz0jt5uzhaeu"
+}

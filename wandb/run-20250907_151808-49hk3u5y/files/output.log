@@ -1,0 +1,20 @@
+[*] Load D:/miniProj7thSem/brts20/2-train.txt, which contains 333 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load D:/miniProj7thSem/brts20/2-train.txt, which contains 333 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+Traceback (most recent call last):
+  File "d:\miniProj7thSem\HFF\train.py", line 222, in <module>
+    model = model.cuda()
+  File "C:\Users\k7adi\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 918, in cuda
+    return self._apply(lambda t: t.cuda(device))
+  File "C:\Users\k7adi\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 810, in _apply
+    module._apply(fn)
+  File "C:\Users\k7adi\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 810, in _apply
+    module._apply(fn)
+  File "C:\Users\k7adi\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 833, in _apply
+    param_applied = fn(param)
+  File "C:\Users\k7adi\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 918, in <lambda>
+    return self._apply(lambda t: t.cuda(device))
+  File "C:\Users\k7adi\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\cuda\__init__.py", line 289, in _lazy_init
+    raise AssertionError("Torch not compiled with CUDA enabled")
+AssertionError: Torch not compiled with CUDA enabled

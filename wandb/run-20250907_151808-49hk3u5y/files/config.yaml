@@ -1,0 +1,137 @@
+_wandb:
+    value:
+        cli_version: 0.21.3
+        e:
+            49pouwdaaimbu4o5zq9xfz0jt5uzhaeu:
+                codePath: train.py
+                codePathLocal: train.py
+                cpu_count: 10
+                cpu_count_logical: 16
+                cudaVersion: "12.6"
+                disk:
+                    /:
+                        total: "215591735296"
+                        used: "161520558080"
+                email: k7aditya@gmail.com
+                executable: C:\Users\k7adi\AppData\Local\Programs\Python\Python310\python.exe
+                git:
+                    commit: baca598c82a57b230224358bf617d86398a932b3
+                    remote: https://github.com/VinyehShaw/HFF.git
+                gpu: NVIDIA GeForce RTX 3050 Laptop GPU
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 2048
+                      memoryTotal: "4294967296"
+                      name: NVIDIA GeForce RTX 3050 Laptop GPU
+                      uuid: GPU-e6cff3d5-7432-b2a1-51b8-129c39093653
+                host: ADITYA
+                memory:
+                    total: "16831705088"
+                os: Windows-10-10.0.26100-SP0
+                program: d:\miniProj7thSem\HFF\train.py
+                python: CPython 3.10.11
+                root: D:\miniProj7thSem\HFF
+                startedAt: "2025-09-07T09:48:08.272396Z"
+                writerId: 49pouwdaaimbu4o5zq9xfz0jt5uzhaeu
+        m: []
+        python_version: 3.10.11
+        t:
+            "1":
+                - 1
+                - 2
+                - 3
+                - 5
+                - 11
+                - 41
+                - 48
+                - 49
+                - 53
+            "2":
+                - 1
+                - 2
+                - 3
+                - 5
+                - 11
+                - 41
+                - 48
+                - 49
+                - 53
+            "4": 3.10.11
+            "5": 0.21.3
+            "6": 4.46.3
+            "8":
+                - 2
+                - 3
+            "12": 0.21.3
+            "13": windows-amd64
+batch_size:
+    value: 1
+class_type:
+    value: all
+dataset_name:
+    value: brats20
+display_iter:
+    value: 1
+gamma:
+    value: 0.55
+input1:
+    value: L
+input2:
+    value: H
+loss:
+    value: dice
+loss2:
+    value: ff
+lr:
+    value: 0.3
+momentum:
+    value: 0.9
+network:
+    value: hff
+num_epochs:
+    value: 5
+path_trained_models:
+    value: ./result/checkpoints/hff
+queue_length:
+    value: 48
+samples_per_volume_train:
+    value: 4
+samples_per_volume_val:
+    value: 8
+selected_modal:
+    value:
+        - flair_L
+        - t1_L
+        - t1ce_L
+        - t2_L
+        - flair_H1
+        - flair_H2
+        - flair_H3
+        - flair_H4
+        - t1_H1
+        - t1_H2
+        - t1_H3
+        - t1_H4
+        - t1ce_H1
+        - t1ce_H2
+        - t1ce_H3
+        - t1ce_H4
+        - t2_H1
+        - t2_H2
+        - t2_H3
+        - t2_H4
+step_size:
+    value: 50
+sup_mark:
+    value: "100"
+train_list:
+    value: D:/miniProj7thSem/brts20/2-train.txt
+unsup_weight:
+    value: 15
+val_list:
+    value: D:/miniProj7thSem/brts20/2-train.txt
+warm_up_duration:
+    value: 40
+wd:
+    value: -5
