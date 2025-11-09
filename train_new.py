@@ -8,6 +8,8 @@ import numpy as np
 import random
 from tqdm import tqdm
 import wandb
+from datetime import datetime
+
 
 
 from config.train_test_config.train_test_config import print_train_loss, print_val_loss, \
@@ -225,17 +227,49 @@ if __name__ == '__main__':
     print_num_minus = print_num - 2
     print_num_half = int(print_num / 2 - 1)
 
-    path_trained_models = args.path_trained_models + '/' + str(os.path.split(args.dataset_name)[1]+ '/' + str(args.class_type) )
-    if not os.path.exists(path_trained_models):
-        os.makedirs(path_trained_models)
-    path_trained_models = path_trained_models + '/' + str(args.network) + '-l=' + str(args.lr) + '-e=' + str(
-        args.num_epochs) + '-s=' + str(args.step_size) + '-g=' + str(args.gamma) + '-b=' + str(
-        args.batch_size) + '-cw=' + str(args.unsup_weight) + '-w=' + str(args.warm_up_duration) + '-' + str(
-        args.sup_mark) + str(args.input1) + '-' + str(args.input2)
+
+    # Generate a timestamp for unique model saving
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    path_trained_models = (
+        args.path_trained_models
+        + '/'
+        + str(os.path.split(args.dataset_name)[1] + '/' + str(args.class_type))
+    )
     if not os.path.exists(path_trained_models):
         os.makedirs(path_trained_models)
 
+    # Add all parameters + timestamp to folder name
+    path_trained_models = (
+        path_trained_models
+        + '/'
+        + str(args.network)
+        + '-l='
+        + str(args.lr)
+        + '-e='
+        + str(args.num_epochs)
+        + '-s='
+        + str(args.step_size)
+        + '-g='
+        + str(args.gamma)
+        + '-b='
+        + str(args.batch_size)
+        + '-cw='
+        + str(args.unsup_weight)
+        + '-w='
+        + str(args.warm_up_duration)
+        + '-'
+        + str(args.sup_mark)
+        + str(args.input1)
+        + '-'
+        + str(args.input2)
+        + '-'
+        + timestamp
+    )
 
+    if not os.path.exists(path_trained_models):
+        os.makedirs(path_trained_models)
+    
     
     data_files = dict(train=args.train_list, val=args.val_list)
     loaders = get_loaders(data_files, args.selected_modal, args.batch_size, num_workers=8)
