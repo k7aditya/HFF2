@@ -9,6 +9,8 @@ import random
 from tqdm import tqdm
 import wandb
 import nibabel as nib
+import sys
+from datetime import datetime
 
 from config.train_test_config.train_test_config import print_val_loss, print_val_eval, save_val_best_3d_m
 from config.warmup_config.warmup import GradualWarmupScheduler
@@ -17,12 +19,34 @@ from model.HFF import HFFNet
 from loader.dataload3d import get_loaders
 from warnings import simplefilter
 
-# XAI imports - add these
+# XAI imports
 from explainability.attention_vis import FDCAAttentionVisualizer, SegmentationGradCAM, FrequencyComponentAnalyzer
 from explainability.mc_dropout import MCDropoutUncertainty
 from explainability.freq_analysis import FrequencyDomainAnalyzer
 
 simplefilter(action='ignore', category=FutureWarning)
+
+# ---------------------------- LOGGER SETUP ---------------------------- #
+class Logger(object):
+    def __init__(self, logfile):
+        self.terminal = sys.stdout
+        self.log = open(logfile, "a", buffering=1)  # line-buffered for real-time writes
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
+# Create logs folder and log file with timestamp
+os.makedirs("evaluation_logs", exist_ok=True)
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+log_file = f"evaluation_logs/inference_log_{timestamp}.txt"
+sys.stdout = Logger(log_file)
+sys.stderr = sys.stdout  # redirect errors as well
+print(f"Logging all outputs to: {log_file}")
 
 
 def init_seeds(seed):
@@ -37,7 +61,6 @@ def init_seeds(seed):
 
 
 def make_label_mapping(dataset_name, class_type):
-    # (keep your existing function as is)
     if dataset_name in ('brats19', 'brats20', 'msdbts'):
         raw = [0, 1, 2, 4]
     else:
@@ -61,7 +84,6 @@ def mask_to_class_indices(mask, mapping):
     for old, new in mapping.items():
         out[mask == old] = new
     return out
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='HFF-Net 3D Inference')
