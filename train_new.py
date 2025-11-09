@@ -182,7 +182,7 @@ if __name__ == '__main__':
     parser.add_argument('--input2', default='H')
     parser.add_argument('--sup_mark', default='100', help='100')
     parser.add_argument('-b', '--batch_size', default=1, type=int)
-    parser.add_argument('-e', '--num_epochs', default=150, type=int) #default : 450
+    parser.add_argument('-e', '--num_epochs', default=200, type=int) #default : 450
     parser.add_argument('-s', '--step_size', default=50, type=int)
     parser.add_argument('-l', '--lr', default=0.3, type=float)
     parser.add_argument('-g', '--gamma', default=0.55, type=float)
@@ -308,7 +308,7 @@ if __name__ == '__main__':
                     full_input = torch.cat((low_freq_inputs, high_freq_inputs), dim=1)
 
                     # MC forward passes with dropout active
-                    mc_outputs = mc_dropout.mc_forward_pass(full_input)
+                    mc_outputs = mc_dropout.mc_forward_pass(low_freq_inputs, high_freq_inputs)
 
                     mean_pred, uncertainty_map = mc_dropout.compute_uncertainty_maps(mc_outputs)
 

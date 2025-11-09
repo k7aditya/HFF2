@@ -57,29 +57,16 @@ class MCDropoutUncertainty:
         for layer in self.dropout_layers:
             layer.eval()
     
-    def mc_forward_pass(self, input_tensor: torch.Tensor) -> List[torch.Tensor]:
-        """
-        Perform N stochastic forward passes with dropout enabled
-        
-        Args:
-            input_tensor: Input batch (B, C, H, W) or (B, C, D, H, W)
-            
-        Returns:
-            List of N segmentation outputs
-        """
-        input_tensor = input_tensor.to(self.device)
+    def mc_forward_pass(self, input1: torch.Tensor, input2: torch.Tensor) -> List[torch.Tensor]:
         outputs = []
-        
         self.enable_dropout_inference()
-        
         with torch.no_grad():
             for _ in range(self.num_samples):
-                output = self.model(input_tensor)
-                outputs.append(output.cpu())
-        
+                output = self.model(input1, input2)
+                outputs.append(output[0].cpu())
         self.disable_dropout_inference()
-        
         return outputs
+
     
     def compute_uncertainty_maps(self, outputs: List[torch.Tensor]) -> Tuple[np.ndarray, np.ndarray]:
         """

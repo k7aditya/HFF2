@@ -1,0 +1,783 @@
+  138  export LD_LIBRARY_PATH=$HOME/opt/gcc-9.5/lib64:$LD_LIBRARY_PATH
+  139  gcc --version   # should show 9.5.0
+  140  cd /tmp/glibc-2.28/build
+  141  make distclean || true   # clean up any previous attempts
+  142  ../configure --prefix=$HOME/opt/glibc-2.28
+  143  make -j$(nproc)
+  144  mkdir build
+  145  cd build
+  146  ../configure --disable-multilib --enable-languages=c,c++ --prefix=$HOME/opt/gcc-9.5
+  147  make -j$(nproc)
+  148  make install
+  149  ./contrib/download_prerequisites
+  150  cd ..
+  151  ./contrib/download_prerequisites
+  152  cd ..
+  153  ./contrib/download_prerequisites
+  154  ld
+  155  ls
+  156  cd tmp
+  157  ls
+  158  ./contrib/download_prerequisites
+  159  cd ..
+  160  cd /tmp
+  161  wget https://ftp.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.gz
+  162  tar -xvf gcc-9.5.0.tar.gz
+  163  cd gcc-9.5.0
+  164  ./contrib/download_prerequisites
+  165  mkdir build
+  166  cd build
+  167  ../configure --disable-multilib --enable-languages=c,c++ --prefix=$HOME/opt/gcc-9.5
+  168  make -j$(nproc)
+  169  make install
+  170  export PATH=$HOME/opt/gcc-9.5/bin:$PATH
+  171  export LD_LIBRARY_PATH=$HOME/opt/gcc-9.5/lib64:$LD_LIBRARY_PATH
+  172  gcc --version   # should show 9.5.0
+  173  cd /tmp/glibc-2.28/build
+  174  make distclean || true   # clean up any previous attempts
+  175  ../configure --prefix=$HOME/opt/glibc-2.28
+  176  make -j$(nproc)
+  177  make install
+  178  cd /tmp
+  179  wget https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz
+  180  tar -xvf make-4.4.1.tar.gz
+  181  cd make-4.4.1
+  182  ./configure --prefix=$HOME/opt/make-4.4.1
+  183  make -j$(nproc)
+  184  make install
+  185  export PATH=$HOME/opt/make-4.4.1/bin:$PATH
+  186  make --version
+  187  export PATH=$HOME/opt/gcc-9.5/bin:$HOME/opt/make-4.4.1/bin:$PATH
+  188  export LD_LIBRARY_PATH=$HOME/opt/gcc-9.5/lib64:$LD_LIBRARY_PATH
+  189  cd /tmp/glibc-2.28/build
+  190  make distclean || true
+  191  ../configure --prefix=$HOME/opt/glibc-2.28
+  192  make -j$(nproc)
+  193  make install
+  194  cd /tmp
+  195  wget https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz
+  196  tar -xvf make-4.4.1.tar.gz
+  197  cd make-4.4.1
+  198  ./configure --prefix=$HOME/opt/make-4.4.1
+  199  make -j$(nproc)
+  200  make install
+  201  export PATH=$HOME/opt/gcc-9.5/bin:$HOME/opt/make-4.4.1/bin:$PATH
+  202  export LD_LIBRARY_PATH=$HOME/opt/gcc-9.5/lib64:$LD_LIBRARY_PATH
+  203  cd /tmp/glibc-2.28/build
+  204  make distclean || true
+  205  ../configure --prefix=$HOME/opt/glibc-2.28
+  206  make -j$(nproc)
+  207  make install
+  208  gcc --version      # should show 9.5.0
+  209  make --version     # should show 4.4.1
+  210  cd /tmp/glibc-2.28/build
+  211  make distclean || true
+  212  ../configure --prefix=$HOME/opt/glibc-2.28
+  213  make -j$(nproc)
+  214  make install
+  215  cd /tmp/glibc-2.28
+  216  rm -rf build
+  217  mkdir build && cd build
+  218  export PATH=$HOME/opt/make-4.4.1/bin:$HOME/opt/gcc-9.5/bin:$PATH
+  219  export LD_LIBRARY_PATH=$HOME/opt/gcc-9.5/lib64:$LD_LIBRARY_PATH
+  220  which make
+  221  which gcc
+  222  MAKE=$HOME/opt/make-4.4.1/bin/make ../configure --prefix=$HOME/opt/glibc-2.28
+  223  make -j$(nproc)
+  224  make install
+  225  cd /tmp/glibc-2.28
+  226  rm -rf build
+  227  mkdir build && cd build
+  228  export PATH=$HOME/opt/make-4.4.1/bin:$HOME/opt/gcc-9.5/bin:$PATH
+  229  export LD_LIBRARY_PATH=$HOME/opt/gcc-9.5/lib64:$LD_LIBRARY_PATH
+  230  CFLAGS="-O2 -U_FORTIFY_SOURCE -fno-stack-protector -Wno-error" CXXFLAGS="-O2 -Wno-error" MAKE=$HOME/opt/make-4.4.1/bin/make ../configure --prefix=$HOME/opt/glibc-2.28
+  231  make -j$(nproc)
+  232  clear
+  233  ls
+  234  cd BrainTumorHFF
+  235  ls
+  236  rm -rf ./*
+  237  ls
+  238  clear
+  239  ls
+  240  git init
+  241  git clone https://github.com/k7aditya/HFF.git
+  242  ls
+  243  cd HFF
+  244  ls
+  245  cd ..
+  246  ls
+  247  git status
+  248  cd HFF
+  249  ls
+  250  clear
+  251  git status
+  252  git pull
+  253  clear
+  254  ls
+  255  cd model
+  256  ls
+  257  cd ..
+  258  \ls
+  259  mkdir dat
+  260  ls
+  261  mv dat data
+  262  ls
+  263  cd data
+  264  ls
+  265  clear
+  266  rsync -ahP --info=progress2 /path/to/BraTS2020_TrainingData.zip user@server:/data/brats2020/     
+  267  clear
+  268  pwd
+  269  ls
+  270  cd ..
+  271  ls
+  272  mkdir .gitignore
+  273  ls
+  274  cd data
+  275  ls
+  276  cd ..
+  277  conda create -n hff python=3.8
+  278  python --version
+  279  conda activate HFF
+  280  conda activate hff
+  281  conda source activate hff
+  282  conda
+  283  clear
+  284  conda version
+  285  conda --version
+  286  python --version
+  287  conda source activate hff
+  288  clear
+  289  conda source activate hff
+  290  clear
+  291  conda init bash
+  292  git status
+  293  which conda
+  294  clear
+  295  conda --version
+  296  conda conda env list
+  297  conda env list
+  298  conda env remove --name hff
+  299  clear
+  300  conda create -n hff python=3.10
+  301  conda --version
+  302  conda source activate hff
+  303  clear
+  304  source activate hff
+  305  clear
+  306  pip install requirements.txt
+  307  python --version
+  308  pip install requirements.txt
+  309  pip install -r requirements.txt
+  310  ls
+  311  nano requirements.txt
+  312  pip install -r requirements.txt
+  313  nano requirements.txt
+  314  pip install -r requirements.txt
+  315  lspci | grep -i vga
+  316  df -h
+  317  cd data
+  318  ls
+  319  unzip BRATS2020.zip
+  320  ls
+  321  cd BraTS2020_TrainingData
+  322  ls
+  323  cd MICCAI_BraTS2020_TrainingData
+  324  ls
+  325  cd BraTS20_Training_355
+  326  ls
+  327  cd BraTS20_Training_356
+  328  cd ..
+  329  cd BraTS20_Training_356
+  330  ls
+  331  cd ..
+  332  cd BraTS20_Training_355
+  333  mv W39_1998.09.19_Segm.nii BraTS20_Training_355_seg.nii
+  334  ls
+  335  cd ..
+  336  ls
+  337  cd ..
+  338  ls
+  339  df -h
+  340  ls
+  341  cd data
+  342  ls
+  343  cd BraTS2020_TrainingData
+  344  ls
+  345  cd MICCAI_BraTS2020_TrainingData
+  346  pwd
+  347  python DTCWT_LF.py --data_root /home/manish/BrainTumorHFF/HFF/data/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData
+  348  cd ..
+  349  ls
+  350  python DTCWT_LF.py --data_root /home/manish/BrainTumorHFF/HFF/data/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData
+  351  ls
+  352  cd BrainTumorHFF
+  353  ls
+  354  cd HFF
+  355  ls
+  356  cd data
+  357  ls
+  358  git status
+  359  cd BraTS2020_TrainingData
+  360  ls
+  361  cd MICCAI_BraTS2020_TrainingData
+  362  ls
+  363  cd BraTS_Training_001
+  364  cd BraTS20_Training_001
+  365  ls
+  366  cd BrainTumorHFF
+  367  ls
+  368  cd HFF
+  369  ls
+  370  cd requirements.txt
+  371  nano requirements.txt
+  372  sudo yum install -y python3-pip
+  373  pip3 install speedtest-cli
+  374  sudo speedtest-cli
+  375  ls
+  376  cd KANSeg/
+  377  #!/bin/bash
+  378  curl -L -o ~/Downloads/brats20-dataset-training-validation.zip  https://www.kaggle.com/api/v1/datasets/download/awsaf49/brats20-dataset-training-validation
+  379  curl -L -o ./Dataset  https://www.kaggle.com/api/v1/datasets/download/awsaf49/brats20-dataset-training-validation
+  380  ls
+  381  cd Dataset
+  382  ls
+  383  nano kan_spline.py
+  384  ls
+  385  cd KANSeg/
+  386  ls
+  387  cd Dataset1
+  388  ls
+  389  cd Dataset1
+  390  unzip
+  391  ls
+  392  conda
+  393  conda create --prefix ./env python=3.10.10 -y
+  394  conda update -n base -c defaults conda -y
+  395  conda create -n ./env python=3.10 -y
+  396  conda create -n env python=3.10 -y
+  397  source activate env
+  398  ls
+  399  cd Dataset
+  400  ls
+  401  ls -a
+  402  cd Dataset1
+  403  ls
+  404  ls -l
+  405  file Dataset Dataset1
+  406  unzip Dataset
+  407  ls
+  408  cd BraTS2020_TrainingData/
+  409  ls
+  410  cd MICCAI_BraTS2020_TrainingData/
+  411  ls
+  412  cd BraTS20_Training_001
+  413  ls
+  414  cd ..
+  415  cd BraTS2020_ValidationData/
+  416  ls
+  417  cd MICCAI_BraTS2020_ValidationData/
+  418  ls
+  419  cd ..
+  420  ls
+  421  pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu117
+  422  pip install nibabel numpy scipy scikit-image tqdm
+  423  pip freeze >> requirements.txt 
+  424  mkdir model
+  425  mkdir models
+  426  rmdir model
+  427  touch kan_spline.py
+  428  nano kan_spline.py
+  429  sudo nano kan_spline.py
+  430  nano kan_spline.py
+  431  vim kan_spline.py
+  432  clear
+  433  ls
+  434  cd BrainTumorHFF
+  435  ls
+  436  cd HFF
+  437  ls
+  438  python DTCWT_LF.py
+  439  clear
+  440  ls
+  441  uname -a
+  442  cat /etc/os-release || lsb_release -a
+  443  uname -m
+  444  which bash tar gzip mkdir ln sed grep curl wget scp ssh >/dev/null 2>&1 && echo "tools ok" || { echo "missing tools:"; which bash tar gzip mkdir ln sed grep curl wget scp ssh; }
+  445  df -h ~ /tmp
+  446  touch ~/vscode_test && echo "home writable" && rm ~/vscode_test || echo "can't write home"       
+  447  touch /tmp/vscode_test && echo "/tmp writable" && rm /tmp/vscode_test || echo "can't write /tmp" 
+  448  ls -ld ~/.vscode-server 2>/dev/null || echo "~/.vscode-server not present"
+  449  clear
+  450  maninsh@123
+  451  clear
+  452  ls
+  453  cd BrainTumorHFF
+  454  ls
+  455  cd HFF
+  456  ls
+  457  git status
+  458  clear
+  459  source activate hff
+  460  ls
+  461  python DTCWT_LF.py
+  462  ls
+  463  cd data
+  464  ls
+  465  cd BraTS2020_TrainingData
+  466  ls
+  467  cd MICCAI_BraTS2020_TrainingData
+  468  ls
+  469  pwd
+  470  clear
+  471  cd ..
+  472  ls
+  473  python DTCWT_LF.py --data_root
+  474  cd MICCAI_BraTS2020_TrainingData
+  475  cd data
+  476  cd BraTS2020_TrainingData
+  477  cd MICCAI_BraTS2020_TrainingData
+  478  pwd
+  479  cd ..
+  480  python DTCWT_LF.py --data_root /home/manish/BrainTumorHFF/HFF/data/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData
+  481  ls
+  482  cd NSCT_BTS
+  483  ls
+  484  nano nsct_hf.m
+  485  clear
+  486  df -h
+  487  clear
+  488  df -h
+  489  clear
+  490  matlab -version
+  491  matlab
+  492  git
+  493  clear
+  494  git -version
+  495  git --version
+  496  clear
+  497  matlab --version
+  498  matlab -version
+  499  ls
+  500  cd
+  501  clear
+  502  ls
+  503  ls
+  504  cd BrainTumorHFF
+  505  ls
+  506  cd HFF
+  507  ls
+  508  cd data
+  509  ls
+  510  cd BraTS2020_TrainingData
+  511  ls
+  512  cd MICCAI_BraTS2020_TrainingData
+  513  ,s
+  514  ls
+  515  cd BraTS20_Training_001
+  516  ls
+  517  python --version
+  518  df -h
+  519  clear
+  520  ls
+  521  cd BrainTumorHFF
+  522  ls
+  523  cd HFF
+  524  ls
+  525  cd data
+  526  ls
+  527  find . -mindepth 1 -delete
+  528  ls
+  529  find . -mindepth 1
+  530  find . -mindepth 1 -delete
+  531  ls
+  532  df -h
+  533  clear
+  534  pwd
+  535  ls
+  536  cd ..
+  537  git status
+  538  git pull
+  539  git status
+  540  git add NSCT_BTS/nsct_hf.m requirements.txt
+  541  git status
+  542  git commit -m "updated"
+  543  git status
+  544  clear
+  545  ls
+  546  cd data
+  547  ls
+  548  unzip BraTS2020_TrainingData.zip
+  549  ls
+  550  UNZIP_DISABLE_ZIPBOMB_DETECTION=TRUE unzip yourfile.zip
+  551  ls
+  552  cd BrainTumorHFF
+  553  ls
+  554  cd HFF
+  555  ls
+  556  cd data
+  557  ls
+  558  UNZIP_DISABLE_ZIPBOMB_DETECTION=TRUE unzip BraTS2020_TrainingData.zip
+  559  ls
+  560  cd BraTS2022_TrainingData
+  561  ls
+  562  cd BraTS2020_TrainingData
+  563  ls
+  564  cd BraTS2020_TrainingData
+  565  ls
+  566  cd MICCAI_BraTS2020_TrainingData
+  567  ls
+  568  cd BraTS20_Training_279
+  569  ls
+  570  cd ..
+  571  cd BraTS20_Training_355
+  572  ls
+  573  mv W39_1998.09.19_Segm.nii BraTS20_Training_355_seg.nii
+  574  ls
+  575  clear
+  576  ls
+  577  cd BrainTumorHFF
+  578  ls
+  579  cd HFF
+  580  ls
+  581  cd data
+  582  ls
+  583  mkdir brats20
+  584  ls
+  585  cd ..
+  586  ls
+  587  cd utils
+  588  ls
+  589  cd ..
+  590  cd dagta
+  591  cd data
+  592  ls
+  593  cd BraTs2020_TrainingData
+  594  cd BraTS2020_TrainingData
+  595  ls
+  596  cd MICCAI_BraTS2020_TrainingData
+  597  ls
+  598  pwd
+  599  cd ..
+  600  ls
+  601  cd ..
+  602  ls
+  603  cd brats20
+  604  ls
+  605  pwd
+  606  cd ..
+  607  cd utils
+  608  cls
+  609  ls
+  610  python split.py --brain_dir /home/manish/BrainTumorHFF/HFF/data/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData --save_dir /home/manish/BrainTumorHFF/HFF/data/brats20
+  611  cd ..
+  612  source activate hff
+  613  python split.py --brain_dir /home/manish/BrainTumorHFF/HFF/data/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData --save_dir /home/manish/BrainTumorHFF/HFF/data/brats20
+  614  l
+  615  ls
+  616  cd utils
+  617  ls
+  618  python split.py --brain_dir /home/manish/BrainTumorHFF/HFF/data/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData --save_dir /home/manish/BrainTumorHFF/HFF/data/brats20
+  619  ls
+  620  cd ..
+  621  ls
+  622  cd data
+  623  ls
+  624  cd brats20
+  625  ls
+  626  nano 2-train.txt
+  627  pwd
+  628  cd ..
+  629  ls
+  630  python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  631  clear
+  632  git pull
+  633  clear
+  634  ls
+  635  python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  636  ls
+  637  cd wandb
+  638  ls
+  639  pwd
+  640  cd ..
+  641  ls
+  642  rm /home/manish/BrainTumorHFF/HFF/wandb
+  643  rm -rf /home/manish/BrainTumorHFF/HFF/wandb
+  644  ls
+  645  clear
+  646  ls
+  647  clear
+  648  python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  649  df -h
+  650  nvidia -smi
+  651  nvidia-smi
+  652  clear
+  653  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  654  clear
+  655  ls
+  656  cd BrainTumorHFF
+  657  ls
+  658  cd HFF
+  659  ls
+  660  nano training_loglite.txt
+  661  source activate hff
+  662  clear
+  663  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  664  clear
+  665   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  666  cleawr
+  667  clear
+  668  find your_data_path/MICCAI_BraTS2020_TrainingData -type f -name "*.nii.nii.gz" -exec bash -c 'for f; do mv "$f" "${f/.nii.nii.gz/.nii.gz}"; done' _ {} +
+  669  cd data
+  670  ls
+  671  cd BraTS2020_TrainingData
+  672  ls
+  673  pwd
+  674  cd ..
+  675  ls
+  676  find /home/manish/BrainTumorHFF/HFF/data/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData -type f -name "*.nii.nii.gz" -exec bash -c 'for f; do mv "$f" "${f/.nii.nii.gz/.nii.gz}"; done' _ {} +     
+  677  ls
+  678  cd data
+  679  ls
+  680  cd BraTS2020_Trainign_data
+  681  cd BraTS2020_TrainignData
+  682  cd BraTS2020_TrainingData
+  683  ls
+  684  cd MICCAI_BraTS2020_TrainingData
+  685  ls
+  686  cd BraTS20_Training_300
+  687  ls
+  688  clear
+  689  cd ..
+  690  ls
+  691   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  692  clear
+  693  ls
+  694  cd data
+  695  ls
+  696  cd brats20
+  697  ls
+  698  cd 2-train.txt
+  699  ls
+  700  cd 2-train.txt
+  701  nano 2-train.txt
+  702  nano 2-val.txt
+  703  clear
+  704  cd ..
+  705   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  706  clear
+  707  git status
+  708  git pull
+  709  ls
+  710  nano train.py
+  711  clear
+  712  ls
+  713  cd BrainTumorHFF
+  714  ls
+  715  cd HFF
+  716  ls
+  717  nano train.py
+  718  ls
+  719  cd result
+  720  ls
+  721  cd checkpoints
+  722  ls
+  723  cd hff
+  724  ls
+  725  cd brats20
+  726  ls
+  727  cd all
+  728  ls
+  729  cd ..
+  730  ls
+  731  nano training_loglite.txt
+  732  clear
+  733  git status
+  734  ls
+  735  cd BrainTumorHFF
+  736  ls
+  737  cd HFF
+  738  ls
+  739  git status
+  740  git pull
+  741  clear
+  742  ls
+  743  nano train.py
+  744  source activate hff
+  745  conda install scipy sckikit-learn grad-cam seaborn opencv-python
+  746  conda install scipy scikit-learn seaborn opencv
+  747  clear
+  748   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  749  conda install matplotlib
+  750   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  751  conda install seaborn
+  752  conda install opencv
+  753  conda info torchaudio
+  754  conda info opencv
+  755  conda install opencv
+  756  clear
+  757  conda info opencv
+  758  clear
+  759  conda info torchaudio
+  760  pip install opencv-python
+  761  python -m pip install opencv-python
+  762  clear
+  763   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  764  conda remove pandas -y
+  765  conda install -c conda-forge pandas -y
+  766   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  767  clear
+  768  pip install -r requirements.txt
+  769   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  770  clear
+  771  git pull
+  772  ls
+  773   python train_old.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  774  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  775   python train_old.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  776  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  777  clear
+  778   python train_old.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  779  python -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available(), torch.cuda.get_device_name(0))"conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  780  clear
+  781  conda remove pytorch torchvision torchaudio -y
+  782  conda clean --all -y
+  783  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  784  conda remove pytorch torchvision torchaudio -y
+  785  source deactivate
+  786  python --version
+  787  source activate hff
+  788  python --version
+  789  source deactivate
+  790  conda create -n hff2 python 3.10
+  791  source actvate hff2
+  792  cd ..
+  793  conda create -n hff2 python 3.10
+  794  conda create -n hff2 python=3.10
+  795  source activate hff2
+  796  ls
+  797  cd HFF
+  798  ls
+  799  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  800  clea
+  801  clear
+  802  pip install -r requirements.txt
+  803  nano requirements.txt
+  804  clear
+  805  nano requirements.txt
+  806  ls
+  807  pip install -r requirements.txt
+  808  clear
+  809  source deactivate
+  810  source activate hff
+  811  source deactivate
+  812  conda create -new hff3 python=3.10
+  813  conda create -name hff3 python=3.10
+  814  conda create -n hff3 python=3.10
+  815  source activate hff3
+  816  pip install -r requirements.txt
+  817  clear
+  818  conda list --revisions
+  819  cleawr
+  820  clear
+  821  source deactivate
+  822  source activate hff
+  823  conda list --revisions
+  824  conda install --revision 1
+  825  conda list --revisions
+  826  conda config --show channels
+  827  clear
+  828  conda list --revisions
+  829  clear
+  830  conda env --list
+  831  conda env list
+  832  source deactivate
+  833  cond env lsit
+  834  conda env list
+  835  history
+  836  cd ..
+  837  history
+  838  clear
+  839  history
+  840  clear
+  841  conda remove --name hff2 --all
+  842  conda remove --name hff3 --all
+  843  conda remove --name hff --all
+  844  conda env lsit
+  845  conda env list
+  846  conda create -n hff python=3.10
+  847  source activate hff
+  848  pip install -r requirements.txt
+  849  cd hff
+  850  ls
+  851  cd HFF
+  852  pip install -r requirements.txt
+  853  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  854   python train_old.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  855  pip install tqdm
+  856  clear
+  857   python train_old.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  858  git pull
+  859  ls
+  860  mv train.py train_new.py
+  861  mv train_old.py train.py
+  862  ls
+  863  mv eval.py eval_new.py
+  864  mv eval_old.py eval.py
+  865  ls
+  866  clear
+  867   python train_old.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  868   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  869  pip install scikit-learn
+  870  pip install simpleitk
+  871  pip install typeguard==4.2.1
+  872  typeguard==4.2.1
+  873  pip install typeguard==4.2.1
+  874  pip install wandb
+  875  pip install einops==0.8.1
+  876  clear
+  877   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  878  pip install monai==1.3.2
+  879  clear
+  880   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  881  clear
+  882  pip install tqdm
+  883  pip install torch==2.1.2
+  884  conda list --revisions
+  885  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  886  pip install torchio==0.20.1
+  887   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  888  clear
+  889  source deactvate
+  890  source deactivate
+  891  conda create -n hff2 python=3.10
+  892  source activate hff2
+  893  ls
+  894  pip install --no-cache-dir -r requirements.txt
+  895  pip install tqdm
+  896  pip install torch==2.1.2
+  897  torchvision==0.16.2
+  898  torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+  899  pyyaml==6.0.2
+  900  pip install  torchvision==0.16.2
+  901  pip install torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu117
+  902  torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+  903  pip install torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+  904  pip install pyyaml==6.0.2
+  905  typeguard==4.2.1
+  906  pip install typeguard==4.2.1
+  907  pip install simpleitk
+  908  torchio==0.20.1
+  909  pip install torchio==0.20.1
+  910  pip install scikit-learn
+  911  pip install monai==1.3.2
+  912  pip install wandb
+  913  pip install einops==0.8.1
+  914  conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+  915   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  916  conda install -c conda-forge "numpy>=1.23.5,<2.5.0" scipy scikit-learn
+  917   python train.py --train_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt --val_list /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt
+  918  clear
+  919  history
+[manish@localhost ~]$

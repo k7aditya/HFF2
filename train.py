@@ -17,8 +17,6 @@ from loss.loss_function import segmentation_loss
 from model.HFF_MobileNetV3 import HFFNet
 from loader.dataload3d import get_loaders
 from warnings import simplefilter
-from explainability.mc_dropout import DropoutScheduler, MCDropoutUncertainty
-
 
 simplefilter(action='ignore', category=FutureWarning)
 
@@ -44,9 +42,12 @@ class Logger(object):
     def fileno(self):
         return self.terminal.fileno()
 
+import sys
 from datetime import datetime
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-log_file = f"training_log_{timestamp}.txt"
+log_dir="training_logs"
+os.makedirs(log_dir, exist_ok=True)
+timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+log_file = os.path.join(log_dir, f"training_log_{timestamp}.txt")
 sys.stdout = Logger(log_file)
 sys.stderr = sys.stdout  # capture errors too
 
@@ -249,10 +250,6 @@ if __name__ == '__main__':
     model = model.cuda()
     # model = DistributedDataParallel(model, device_ids=[args.local_rank])
 
-    # Initialize DropoutScheduler with base dropout rate 0.5
-    dropout_scheduler = DropoutScheduler(model, base_dropout=0.5)
-    dropout_scheduler.set_dropout_rate(0.5)
-
     # Training Strategy
     criterion = segmentation_loss(args.loss, False,cn=classnum).cuda()
     FFcriterion = segmentation_loss(args.loss2, True).cuda()
@@ -273,50 +270,9 @@ if __name__ == '__main__':
 
     for epoch in range(args.num_epochs):
 
-        # Linearly decay dropout rate from 0.5 to 0.1 over training
-        current_dropout = 0.5 - 0.4 * (epoch / args.num_epochs)
-        dropout_scheduler.set_dropout_rate(max(current_dropout, 0.1))
-        print(f"Epoch {epoch+1} - Dropout rate set to {max(current_dropout, 0.1):.4f}")
-
         count_iter += 1
         if (count_iter - 1) % args.display_iter == 0:
             begin_time = time.time()
-            
-            if epoch % 10 == 0:  # adjust frequency as desired
-                print(f"Epoch {epoch+1} - Running MC-Dropout Uncertainty Estimation...")
-                mc_dropout = MCDropoutUncertainty(model, num_samples=20, device='cuda')
-
-                # Example: pull one batch from val loader for efficient estimation
-                val_iter = iter(loaders['val'])
-                try:
-                    data = next(val_iter)
-                except StopIteration:
-                    data = None
-
-                if data is not None:
-                    low_freq_inputs = []
-                    high_freq_inputs = []
-                    for j in range(20):
-                        input_tensor = data[j].unsqueeze(1).type(torch.cuda.FloatTensor)
-                        if j in [0,1,2,3]:
-                            low_freq_inputs.append(input_tensor)
-                        else:
-                            high_freq_inputs.append(input_tensor)
-
-                    low_freq_inputs = torch.cat(low_freq_inputs, dim=1)
-                    high_freq_inputs = torch.cat(high_freq_inputs, dim=1)
-                    full_input = torch.cat((low_freq_inputs, high_freq_inputs), dim=1)
-
-                    # MC forward passes with dropout active
-                    mc_outputs = mc_dropout.mc_forward_pass(full_input)
-
-                    mean_pred, uncertainty_map = mc_dropout.compute_uncertainty_maps(mc_outputs)
-
-                    # Simple printout of mean uncertainty for logging
-                    print(f"Epoch {epoch+1} - Mean MC-Dropout Uncertainty: {uncertainty_map.mean():.4f}")
-
-                    # Here you can add visualization or save uncertainty maps as needed
-
 
 
 
