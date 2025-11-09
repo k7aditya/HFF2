@@ -8,9 +8,12 @@ venv/
 .idea/
 .vscode/
 *.log
+checkpoints/
 runs/
 wandb/
 data/
 outputs/
 *.nii
 *.nii.gz
+*.h5
+*.ckpt
