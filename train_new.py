@@ -46,7 +46,7 @@ class Logger(object):
 
 from datetime import datetime
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-log_file = f"training_log_{timestamp}.txt"
+log_file = f"training_logs/training_log_{timestamp}.txt"
 sys.stdout = Logger(log_file)
 sys.stderr = sys.stdout  # capture errors too
 

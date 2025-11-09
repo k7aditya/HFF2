@@ -1,40 +1,0 @@
-[34m[1mwandb[0m: Currently logged in as: [33mk7aditya[0m ([33mk7aditya-iiita-alumni-affairs[0m) to [32mhttps://api.wandb.ai[0m. Use [1m`wandb login --relogin`[0m to force relogin
-[34m[1mwandb[0m: setting up run mxz6cmbe (0.0s)
-[Am[2K[34m[1mwandb[0m: setting up run mxz6cmbe (0.0s)
-[Am[2K[34m[1mwandb[0m: setting up run mxz6cmbe (0.0s)
-[Am[2K[34m[1mwandb[0m: setting up run mxz6cmbe (0.0s)
-[Am[2K[34m[1mwandb[0m: Tracking run with wandb version 0.22.3
-[34m[1mwandb[0m: Run data is saved locally in [35m[1m/home/manish/BrainTumorHFF/HFF/wandb/run-20251108_162757-mxz6cmbe[0m
-[34m[1mwandb[0m: Run [1m`wandb offline`[0m to turn off syncing.
-[34m[1mwandb[0m: Syncing run [33methereal-music-11[0m
-[34m[1mwandb[0m:  View project at [34m[4mhttps://wandb.ai/k7aditya-iiita-alumni-affairs/learning%20rate%3D0.3epochs%3D150-step_size%3D50-gamma%3D0.55weight%20between%20braches%3D15warmup%20epochs%3D3brats20_all[0m
-[34m[1mwandb[0m:  View run at [34m[4mhttps://wandb.ai/k7aditya-iiita-alumni-affairs/learning%20rate%3D0.3epochs%3D150-step_size%3D50-gamma%3D0.55weight%20between%20braches%3D15warmup%20epochs%3D3brats20_all/runs/mxz6cmbe[0m
-[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/2-train.txt, which contains 332 paired volume
-modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
-[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/2-val.txt, which contains 37 paired volume
-modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
-  0%|                                                                           | 0/332 [00:00<?, ?it/s]  0%|                                                                           | 0/332 [00:03<?, ?it/s]
-Traceback (most recent call last):
-  File "/home/manish/BrainTumorHFF/HFF/train.py", line 308, in <module>
-    for i, data in enumerate(tqdm(loaders['train'])):
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/site-packages/tqdm/std.py", line 1181, in __iter__
-    for obj in iterable:
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 633, in __next__
-    data = self._next_data()
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1328, in _next_data
-    idx, data = self._get_data()
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1294, in _get_data
-    success, data = self._try_get_data()
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1132, in _try_get_data
-    data = self._data_queue.get(timeout=timeout)
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/multiprocessing/queues.py", line 113, in get
-    if not self._poll(timeout):
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/multiprocessing/connection.py", line 262, in poll
-    return self._poll(timeout)
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/multiprocessing/connection.py", line 429, in _poll
-    r = wait([self], timeout)
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/multiprocessing/connection.py", line 936, in wait
-    ready = selector.select(timeout)
-  File "/home/manish/.conda/envs/hff4/lib/python3.10/selectors.py", line 416, in select
-    fd_event_list = self._selector.poll(timeout)
-KeyboardInterrupt
