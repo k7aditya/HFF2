@@ -234,7 +234,7 @@ if __name__ == '__main__':
                 )
 
                 # MC-Dropout Uncertainty (single sample repeated N times)
-                mc_outputs = uncertainty.mc_forward_pass(full_input)
+                mc_outputs = uncertainty.mc_forward_pass(low, high)
                 mean_pred, uncertainty_map = uncertainty.compute_uncertainty_maps(mc_outputs)
                 predicted_mask = np.argmax(mean_pred[0], axis=0)
                 error_map = np.abs(predicted_mask - seg_mask)
