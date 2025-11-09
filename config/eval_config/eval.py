@@ -125,27 +125,42 @@ def evaluate_multi(y_scores, y_true):
     hausdorff_metric = HausdorffDistanceMetric(include_background=False, reduction='mean', percentile=95)
 
     # 将 numpy 二值 mask 转换为 tensor 并加上 channel 维度
-    pred_et_tensor = torch.from_numpy(pred_et).unsqueeze(1).float()
-    true_et_tensor = torch.from_numpy(true_et).unsqueeze(1).float()
-    hd95_et = hausdorff_metric(y_pred=pred_et_tensor, y=true_et_tensor)
-    # 如果 hd95_et 不是标量，则取平均
-    if hd95_et.numel() > 1:
-        hd95_et = hd95_et.mean()
-    hd95_et = hd95_et.item()
+    # pred_et_tensor = torch.from_numpy(pred_et).unsqueeze(1).float()
+    # true_et_tensor = torch.from_numpy(true_et).unsqueeze(1).float()
+    # hd95_et = hausdorff_metric(y_pred=pred_et_tensor, y=true_et_tensor)
+    # # 如果 hd95_et 不是标量，则取平均
+    # if hd95_et.numel() > 1:
+    #     hd95_et = hd95_et.mean()
+    # hd95_et = hd95_et.item()
 
-    pred_tc_tensor = torch.from_numpy(pred_tc).unsqueeze(1).float()
-    true_tc_tensor = torch.from_numpy(true_tc).unsqueeze(1).float()
-    hd95_tc = hausdorff_metric(y_pred=pred_tc_tensor, y=true_tc_tensor)
-    if hd95_tc.numel() > 1:
-        hd95_tc = hd95_tc.mean()
-    hd95_tc = hd95_tc.item()
+    # pred_tc_tensor = torch.from_numpy(pred_tc).unsqueeze(1).float()
+    # true_tc_tensor = torch.from_numpy(true_tc).unsqueeze(1).float()
+    # hd95_tc = hausdorff_metric(y_pred=pred_tc_tensor, y=true_tc_tensor)
+    # if hd95_tc.numel() > 1:
+    #     hd95_tc = hd95_tc.mean()
+    # hd95_tc = hd95_tc.item()
 
-    pred_wt_tensor = torch.from_numpy(pred_wt).unsqueeze(1).float()
-    true_wt_tensor = torch.from_numpy(true_wt).unsqueeze(1).float()
-    hd95_wt = hausdorff_metric(y_pred=pred_wt_tensor, y=true_wt_tensor)
-    if hd95_wt.numel() > 1:
-        hd95_wt = hd95_wt.mean()
-    hd95_wt = hd95_wt.item()
+    # pred_wt_tensor = torch.from_numpy(pred_wt).unsqueeze(1).float()
+    # true_wt_tensor = torch.from_numpy(true_wt).unsqueeze(1).float()
+    # hd95_wt = hausdorff_metric(y_pred=pred_wt_tensor, y=true_wt_tensor)
+    # if hd95_wt.numel() > 1:
+    #     hd95_wt = hd95_wt.mean()
+    # hd95_wt = hd95_wt.item()
+    def safe_hd95(pred_mask, true_mask):
+        # Skip HD95 if no positive voxels in GT
+        if np.sum(true_mask) == 0:
+            return np.nan  # or some sentinel
+        pred_tensor = torch.from_numpy(pred_mask).unsqueeze(1).float()
+        true_tensor = torch.from_numpy(true_mask).unsqueeze(1).float()
+        hd95 = hausdorff_metric(y_pred=pred_tensor, y=true_tensor)
+        if hd95.numel() > 1:
+            hd95 = hd95.mean()
+        return hd95.item()
+
+    hd95_et = safe_hd95(pred_et, true_et)
+    hd95_tc = safe_hd95(pred_tc, true_tc)
+    hd95_wt = safe_hd95(pred_wt, true_wt)
+
 
     return dice_et, hd95_et, dice_tc, hd95_tc,dice_wt, hd95_wt
 
