@@ -48,30 +48,23 @@ class FDCAAttentionVisualizer:
         for hook in self.hooks:
             hook.remove()
     
-    def extract_attention_maps(self, batch: torch.Tensor, model, 
-                               layer_name: Optional[str] = None) -> Dict:
-        """
-        Extract attention maps from FDCA layers
-        
-        Args:
-            batch: Input tensor (B, C, D, H, W) for 3D or (B, C, H, W) for 2D
-            model: HFF-Net model
-            layer_name: Specific FDCA layer to extract from
-            
-        Returns:
-            Dictionary of attention maps keyed by layer name
-        """
+    def extract_attention_maps(self, batch: torch.Tensor, model, layer_name: Optional[str] = None) -> Dict:
         self.attention_maps.clear()
-        
+
+        # split channels according to LF and HF
+        num_low_freq_channels = 4  # replace with actual number of LF channels used
+        low_freq_input = batch[:, :num_low_freq_channels, ...]
+        high_freq_input = batch[:, num_low_freq_channels:, ...]
+
         with torch.no_grad():
-            _ = model(batch.to(self.device))
-        
+            _ = model(low_freq_input.to(self.device), high_freq_input.to(self.device))
+
         attention_data = {}
         for name, attn in self.attention_maps.items():
             if layer_name is None or layer_name in name:
                 attention_data[name] = attn
-        
         return attention_data
+
     
     def aggregate_attention_maps(self, attention_maps: Dict) -> torch.Tensor:
         """
