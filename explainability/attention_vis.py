@@ -80,22 +80,28 @@ class FDCAAttentionVisualizer:
         
         for attn in attention_maps.values():
             if len(attn.shape) == 5:  # (B, C, D, H, W)
-                # Average across channels and depth
                 attn_spatial = attn.mean(dim=(1, 2))  # (B, H, W)
+                target_size = aggregated.shape[-2:] if aggregated is not None else attn_spatial.shape[-2:]
+                attn_spatial = torch.nn.functional.interpolate(
+                    attn_spatial.unsqueeze(1), size=target_size, mode='trilinear', align_corners=False
+                ).squeeze(1)
             elif len(attn.shape) == 4:  # (B, C, H, W)
-                # Average across channels
                 attn_spatial = attn.mean(dim=1)  # (B, H, W)
+                target_size = aggregated.shape[-2:] if aggregated is not None else attn_spatial.shape[-2:]
+                attn_spatial = torch.nn.functional.interpolate(
+                    attn_spatial.unsqueeze(1), size=target_size, mode='bilinear', align_corners=False
+                ).squeeze(1)
             else:
                 continue
-            
-            # Normalize to [0, 1]
+            # Normalize etc.
             attn_spatial = attn_spatial - attn_spatial.min()
             attn_spatial = attn_spatial / (attn_spatial.max() + 1e-8)
-            
+
             if aggregated is None:
                 aggregated = attn_spatial
             else:
                 aggregated = aggregated + attn_spatial
+
         
         if aggregated is not None:
             aggregated = aggregated / len(attention_maps)
