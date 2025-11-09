@@ -58,6 +58,7 @@ class MCDropoutUncertainty:
             layer.eval()
     
     def mc_forward_pass(self, input1: torch.Tensor, input2: torch.Tensor) -> List[torch.Tensor]:
+        self.model.train()  # enables train globally (dropout & batchnorm)
         outputs = []
         self.enable_dropout_inference()
         with torch.no_grad():
@@ -65,6 +66,7 @@ class MCDropoutUncertainty:
                 output = self.model(input1, input2)
                 outputs.append(output[0].cpu())
         self.disable_dropout_inference()
+        self.model.eval()  # revert back to eval mode
         return outputs
 
     
