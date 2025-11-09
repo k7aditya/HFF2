@@ -15,7 +15,7 @@ from datetime import datetime
 from config.train_test_config.train_test_config import print_val_loss, print_val_eval, save_val_best_3d_m
 from config.warmup_config.warmup import GradualWarmupScheduler
 from loss.loss_function import segmentation_loss
-from model.HFF import HFFNet
+from model.HFF_MobileNetV3 import HFFNet
 from loader.dataload3d import get_loaders
 from warnings import simplefilter
 
