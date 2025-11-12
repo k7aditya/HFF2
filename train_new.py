@@ -308,25 +308,28 @@ if __name__ == '__main__':
     for epoch in range(args.num_epochs):
 
         # Linearly decay dropout rate from 0.5 to 0.1 over training
-        current_dropout = 0.5 - 0.4 * (epoch / args.num_epochs)
+        current_dropout = 0.5 - 0.3 * (epoch / args.num_epochs)
         dropout_scheduler.set_dropout_rate(max(current_dropout, 0.1))
-        print(f"Epoch {epoch+1} - Dropout rate set to {max(current_dropout, 0.1):.4f}")
+        print(f"Epoch {epoch+1} - Dropout rate set to {max(current_dropout, 0.2):.4f}")
 
         count_iter += 1
         if (count_iter - 1) % args.display_iter == 0:
             begin_time = time.time()
             
-            if epoch % 10 == 0:  # adjust frequency as desired
+            if epoch % 10 == 0:
                 print(f"Epoch {epoch+1} - Running MC-Dropout Uncertainty Estimation...")
+                
+                # Force model to eval mode first (for batchnorm stats)
+                model.eval()
+                
                 mc_dropout = MCDropoutUncertainty(model, num_samples=20, device='cuda')
-
-                # Example: pull one batch from val loader for efficient estimation
+                
                 val_iter = iter(loaders['val'])
                 try:
                     data = next(val_iter)
                 except StopIteration:
                     data = None
-
+                
                 if data is not None:
                     low_freq_inputs = []
                     high_freq_inputs = []
@@ -336,20 +339,21 @@ if __name__ == '__main__':
                             low_freq_inputs.append(input_tensor)
                         else:
                             high_freq_inputs.append(input_tensor)
-
+                    
                     low_freq_inputs = torch.cat(low_freq_inputs, dim=1)
                     high_freq_inputs = torch.cat(high_freq_inputs, dim=1)
-                    full_input = torch.cat((low_freq_inputs, high_freq_inputs), dim=1)
-
-                    # MC forward passes with dropout active
+                    
+                    # MC forward passes (will set model.train() internally)
                     mc_outputs = mc_dropout.mc_forward_pass(low_freq_inputs, high_freq_inputs)
-
+                    
                     mean_pred, uncertainty_map = mc_dropout.compute_uncertainty_maps(mc_outputs)
+                    
+                    print(f"Epoch {epoch+1} - Mean MC-Dropout Uncertainty: {uncertainty_map.mean():.6f}")
+                    print(f"Epoch {epoch+1} - Std MC-Dropout Uncertainty: {uncertainty_map.std():.6f}")
+                
+                # Restore model to eval for validation
+                model.eval()
 
-                    # Simple printout of mean uncertainty for logging
-                    print(f"Epoch {epoch+1} - Mean MC-Dropout Uncertainty: {uncertainty_map.mean():.4f}")
-
-                    # Here you can add visualization or save uncertainty maps as needed
 
 
 
