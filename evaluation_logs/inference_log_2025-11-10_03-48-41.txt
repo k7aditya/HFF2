@@ -1,0 +1,12 @@
+Logging all outputs to: evaluation_logs/inference_log_2025-11-10_03-48-41.txt
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+Inference:   0%|          | 0/38 [00:00<?, ?it/s]Inference:   0%|          | 0/38 [00:08<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/manish/BrainTumorHFF/HFF/eval_new.py", line 202, in <module>
+    aggregated_attention = attention_viz.aggregate_attention_maps(attn_maps)
+  File "/home/manish/BrainTumorHFF/HFF/explainability/attention_vis.py", line 98, in aggregate_attention_maps
+    aggregated = aggregated + attn_spatial
+RuntimeError: The size of tensor a (16) must match the size of tensor b (8) at non-singleton dimension 2

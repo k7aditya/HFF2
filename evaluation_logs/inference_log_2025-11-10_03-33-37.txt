@@ -1,0 +1,8 @@
+Logging all outputs to: evaluation_logs/inference_log_2025-11-10_03-33-37.txt
+usage: eval_new.py [-h] [--test_list TEST_LIST] [--checkpoint CHECKPOINT]
+                   [--dataset_name {brats19,brats20,brats23men,msdbts}]
+                   [--class_type {et,tc,wt,all}]
+                   [--selected_modal SELECTED_MODAL [SELECTED_MODAL ...]] [-b BATCH_SIZE] [-l LOSS]
+                   [--loss2 LOSS2] [--output_dir OUTPUT_DIR] [--enable_xai]
+                   [--mc_samples MC_SAMPLES]
+eval_new.py: error: argument --mc_samples: expected one argument
