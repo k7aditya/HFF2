@@ -16,7 +16,7 @@ from config.train_test_config.train_test_config import print_train_loss, print_v
     print_val_eval, print_best,save_val_best_3d_m
 from config.warmup_config.warmup import GradualWarmupScheduler
 from loss.loss_function import segmentation_loss
-from model.HFF_MobileNetV3 import HFFNet
+from model.HFF_MobileNetV3_fixed import HFFNet
 from loader.dataload3d import get_loaders
 from warnings import simplefilter
 from explainability.mc_dropout import DropoutScheduler, MCDropoutUncertainty
