@@ -449,7 +449,14 @@ def hff_net(in_chs1, in_chs2, num_classes):
     return HFFNet(in_chs1, in_chs2, num_classes)
 
 if __name__ == "__main__":
-    model = hff_net(4, 16, 4).cuda()
+    model = hff_net(4, 16, 4, dropout_p=0.2).cuda()
+    # ===== ADD THIS VERIFICATION CODE HERE =====
+    dropout_count = sum(1 for m in model.modules() if isinstance(m, nn.Dropout3d))
+    print(f"Dropout3d layers found: {dropout_count}")  # Should print 50+
+    if dropout_count == 0:
+        print("ERROR: No dropout layers found! MC-Dropout will not work.")
+    else:
+        print(f"SUCCESS: Found {dropout_count} dropout layers for MC-Dropout")
     input1 = torch.rand(1, 4, 128, 128, 128).cuda()
     input2 = torch.rand(1, 16, 128, 128, 128).cuda()
     print("=" * 80)
