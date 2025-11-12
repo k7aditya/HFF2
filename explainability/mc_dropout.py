@@ -1,7 +1,7 @@
-
-# MC-Dropout Uncertainty Estimation Module for HFF-Net (Fixed for 3D BraTS)
-# Ensures dropout stays active and model is in proper train mode during inference
-
+"""
+MC-Dropout Uncertainty Estimation Module for HFF-Net (Fixed for 3D BraTS)
+Ensures dropout stays active and model is in proper train mode during inference
+"""
 
 import torch
 import torch.nn as nn
@@ -19,20 +19,18 @@ class MCDropoutUncertainty:
     """
     
     def __init__(self, model: nn.Module, num_samples: int = 20, 
-                device: str = 'cuda', save_dir: str = 'results/figures/uncertainty'):
+                 device: str = 'cuda', save_dir: str = 'results/figures/uncertainty'):
         self.model = model
         self.num_samples = num_samples
         self.device = device
         self.save_dir = Path(save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
         
-        self.dropout_layers = self._prepare_model()
+        self.dropout_layers = []
+        self._prepare_model()
     
     def _prepare_model(self):
-        """
-        Identify all dropout layers for MC sampling
-        (No changes, this function was correct and robust)
-        """
+        """Identify all dropout layers for MC sampling"""
         self.dropout_layers = []
         for module in self.model.modules():
             if isinstance(module, (nn.Dropout, nn.Dropout2d, nn.Dropout3d)):
@@ -43,90 +41,77 @@ class MCDropoutUncertainty:
         else:
             print(f"Found {len(self.dropout_layers)} dropout layers for MC sampling")
     
-    # --- RECOMMENDED NEW HELPER FUNCTION ---
-    def _set_mc_dropout_state(self, state: bool) -> None:
+    def enable_dropout_inference(self):
         """
-        Sets the model state for MC-Dropout inference.
-
-        Args:
-            state (bool): 
-                True:  Sets model to `eval()` mode, then selectively
-                    re-enables ONLY dropout layers to `train()` mode.
-                    This freezes BatchNorm layers.[1, 2]
-                False: Sets the entire model back to standard `eval()` mode.
+        CRITICAL: Enable dropout during inference
+        - Sets dropout layers to train mode
+        - Ensures dropout probability > 0
         """
-        if state:
-            # 1. Set entire model to eval mode
-            # This freezes BatchNorm running statistics
-            self.model.eval()
-            
-            # 2. Selectively re-enable ONLY dropout layers
-            for layer in self.dropout_layers:
-                layer.train()
-            
-            # Verify that dropout is active
-            active_dropout_count = sum(1 for layer in self.dropout_layers if layer.training)
-            if len(self.dropout_layers) > 0 and active_dropout_count == 0:
-                print("ERROR: Dropout layers found but FAILED to set to train mode!")
-
-        else:
-            # Restore the model to standard eval mode
-            self.model.eval()
-
-    # --- DEPRECATED ORIGINAL FUNCTIONS ---
-    # def enable_dropout_inference(self):...
-    # def disable_dropout_inference(self):...
-    # These are replaced by the more robust `_set_mc_dropout_state` helper.
-
-    # --- CORRECTED FUNCTION ---
-    def mc_forward_pass(self, input1: torch.Tensor, input2: torch.Tensor) -> List:
+        for layer in self.dropout_layers:
+            layer.train()  # Enable dropout
+            # Verify dropout rate is not zero
+            if hasattr(layer, 'p') and layer.p < 0.05:
+                print(f"WARNING: Dropout rate very low: {layer.p}")
+    
+    def disable_dropout_inference(self):
+        """Disable dropout after MC sampling"""
+        for layer in self.dropout_layers:
+            layer.eval()
+    
+    def mc_forward_pass(self, input1: torch.Tensor, input2: torch.Tensor) -> List[torch.Tensor]:
         """
         Perform N stochastic forward passes with dropout ACTIVE
         
-        CRITICAL FIXES (Revised):
-        1. Call `_set_mc_dropout_state(True)` to freeze BatchNorm
-        and activate Dropout.[1, 2]
-        2. Use torch.no_grad() (User's correct implementation).
-        3. Handle multi-input and tuple-output (User's correct implementation).[5, 6, 7]
-        4. Restore model state with `_set_mc_dropout_state(False)`.
+        CRITICAL FIXES:
+        1. Set ENTIRE model to train() mode first
+        2. Then enable dropout layers explicitly
+        3. Use torch.no_grad() to prevent gradient accumulation
+        4. Handle tuple output from model
+        
+        Args:
+            input1: Low-frequency input (B, C_lf, D, H, W)
+            input2: High-frequency input (B, C_hf, D, H, W)
+            
+        Returns:
+            List of N prediction tensors
         """
         outputs = []
         
-        # --- CRITICAL FIX: REMOVED FLAWED LOGIC ---
-        # REMOVED: was_training = self.model.training
-        # REMOVED: self.model.train()  (This was the CRITICAL FLAW [1])
-        # REMOVED: self.enable_dropout_inference()
+        # CRITICAL: Set model to train mode to enable dropout AND batchnorm stochasticity
+        was_training = self.model.training
+        self.model.train()
         
-        try:
-            # 1. Set model to the *correct* MC-Dropout inference state
-            self._set_mc_dropout_state(True)
-            
-            # User's code from here is correct
-            with torch.no_grad():
-                for sample_idx in range(self.num_samples):
-                    # 3. Handle HFF-Net multi-input (correct)
-                    output = self.model(input1, input2)
-                    
-                    # 3. Handle tuple output (correct)
-                    if isinstance(output, tuple):
-                        output = output  # Take first output
-                    
-                    # Store logits on CPU (correct)
-                    outputs.append(output.cpu())
-                    
-                    # Debug: Check variance (retained from original)
-                    if sample_idx > 0 and sample_idx % 5 == 0:
-                        stacked = torch.stack(outputs[:sample_idx+1])
-                        var = stacked.var(dim=0).mean().item()
-                        print(f"  MC sample {sample_idx+1}/{self.num_samples}, variance so far: {var:.6f}")
-
-        finally:
-            # 4. Restore model to a clean, standard inference state
-            self._set_mc_dropout_state(False)
-            
-        # --- END RECOMMENDED MODIFICATION ---
-
-        # Final variance check (retained from original)
+        # Double-ensure dropout layers are active
+        self.enable_dropout_inference()
+        
+        # Verify dropout is actually active
+        active_dropout_count = sum(1 for layer in self.dropout_layers if layer.training)
+        if active_dropout_count == 0:
+            print("ERROR: No dropout layers are in training mode!")
+        
+        with torch.no_grad():
+            for sample_idx in range(self.num_samples):
+                # Forward pass with dropout active
+                output = self.model(input1, input2)
+                
+                # Handle tuple output (HFF-Net returns tuple)
+                if isinstance(output, tuple):
+                    output = output[0]  # Take first output (main prediction)
+                
+                outputs.append(output.cpu())
+                
+                # Debug: Check variance every 5 samples
+                if sample_idx > 0 and sample_idx % 5 == 0:
+                    stacked = torch.stack(outputs[:sample_idx+1])
+                    var = stacked.var(dim=0).mean().item()
+                    print(f"  MC sample {sample_idx+1}/{self.num_samples}, variance so far: {var:.6f}")
+        
+        # Restore original model state
+        self.disable_dropout_inference()
+        if not was_training:
+            self.model.eval()
+        
+        # Final variance check
         if len(outputs) > 1:
             final_stack = torch.stack(outputs)
             final_var = final_stack.var(dim=0).mean().item()
@@ -138,27 +123,25 @@ class MCDropoutUncertainty:
         
         return outputs
     
-    # --- ORIGINAL FUNCTION (RETAINED) ---
-    def compute_uncertainty_maps(self, outputs: List) -> Tuple[np.ndarray, np.ndarray]:
+    def compute_uncertainty_maps(self, outputs: List[torch.Tensor]) -> Tuple[np.ndarray, np.ndarray]:
         """
         Compute mean prediction and uncertainty from MC samples
-        (This function is correct for 'predictive variance')
         
         Args:
-            outputs: List of N segmentation logit outputs (B, C, D, H, W)
+            outputs: List of N segmentation outputs (B, C, D, H, W)
             
         Returns:
-            Tuple of (mean_prediction_logits, uncertainty_map_variance)
+            Tuple of (mean_prediction, uncertainty_map)
         """
         if len(outputs) == 0:
             raise ValueError("No outputs provided")
         
         outputs = torch.stack(outputs, dim=0)  # (N, B, C, D, H, W)
         
-        # Compute mean prediction (on logits)
+        # Compute mean prediction
         mean_pred = outputs.mean(dim=0)  # (B, C, D, H, W)
         
-        # Compute uncertainty as predictive variance (on logits)
+        # Compute uncertainty as predictive variance
         variance = outputs.var(dim=0)  # (B, C, D, H, W)
         
         # Aggregate across classes: average variance
@@ -166,93 +149,12 @@ class MCDropoutUncertainty:
         
         return mean_pred.numpy(), uncertainty.numpy()
 
-    # --- RECOMMENDED ADVANCED METRICS FUNCTION ---
-    def compute_advanced_uncertainty_maps(
-        self, 
-        logit_outputs: List, 
-        epsilon: float = 1e-9
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """
-        Compute advanced, entropy-based uncertainty maps from MC samples.
-        
-        This computes:
-        1. Mean Prediction (Probabilities)
-        2. Predictive Entropy (Total Uncertainty): H[E[p]]
-        3. Expected Entropy (Aleatoric/Data Uncertainty): E[H[p]]
-        4. Mutual Information (Epistemic/Model Uncertainty): MI = H[E[p]] - E[H[p]]
-        
-        Formulas based on standard Bayesian decomposition.[3, 4]
-        
-        Args:
-            logit_outputs: List of N logit tensors (B, C, D, H, W)
-                        from mc_forward_pass. The list has length N.
-            epsilon: Small value for numerical stability (to avoid log(0)).
-                        
-        Returns:
-            Tuple of (mean_probs, predictive_entropy, mutual_information, expected_entropy)
-            - mean_probs: (B, C, D, H, W)
-            - all others: (B, 1, D, H, W)
-        """
-        if len(logit_outputs) == 0:
-            raise ValueError("No outputs provided")
-            
-        # Stack logits along a new 'N' dimension
-        # Shape: (N, B, C, D, H, W)
-        logit_samples = torch.stack(logit_outputs, dim=0)
-        
-        # 1. Convert logits to probabilities
-        # Shape: (N, B, C, D, H, W)
-        prob_samples = torch.softmax(logit_samples, dim=2) # dim=2 is Class dim
-        
-        # 2. Compute mean prediction (averaged probabilities)
-        # Shape: (B, C, D, H, W)
-        mean_probs = prob_samples.mean(dim=0)
-        
-        # 3. Compute Predictive Entropy (Total Uncertainty)
-        # H[E[p]] = -sum_C(p_mean * log(p_mean))
-        # Sum over class dim (dim=1)
-        # Shape: (B, 1, D, H, W)
-        predictive_entropy = -torch.sum(
-            mean_probs * torch.log(mean_probs + epsilon), dim=1, keepdim=True
-        )
-        
-        # 4. Compute Expected Entropy (Aleatoric Uncertainty)
-        # E[H[p]] = - (1/N) * sum_N [ sum_C (p_n * log(p_n)) ]
-        
-        # Compute entropy for each sample
-        # Shape: (N, B, D, H, W)
-        entropy_of_samples = -torch.sum(
-            prob_samples * torch.log(prob_samples + epsilon), dim=2 # Sum over class dim
-        )
-        
-        # Average the entropies over the N samples
-        # Shape: (B, 1, D, H, W)
-        expected_entropy = entropy_of_samples.mean(dim=0, keepdim=True) # Average over N dim
-        
-        # 5. Compute Mutual Information (Epistemic Uncertainty)
-        # MI = H[E[p]] - E[H[p]]
-        # Shape: (B, 1, D, H, W)
-        mutual_information = predictive_entropy - expected_entropy
-        
-        # Clamp MI at 0, as numerical errors can cause small negative values
-        mutual_information = torch.clamp(mutual_information, min=0.0)
-        
-        return (
-            mean_probs.cpu().numpy(),
-            predictive_entropy.cpu().numpy(),
-            mutual_information.cpu().numpy(),
-            expected_entropy.cpu().numpy()
-        )
 
-
-# --- NO CHANGES (ORIGINAL CODE WAS ROBUST) ---
 class DropoutScheduler:
     """
     Manage dropout rates during training
     
     CRITICAL FIX: Maintain minimum dropout rate for MC-Dropout uncertainty
-    (This class is a robust and valid utility for ensuring MC-Dropout
-    remains possible, as it is sensitive to the dropout rate [8])
     """
     
     def __init__(self, model: nn.Module, base_dropout: float = 0.5, min_dropout: float = 0.2):

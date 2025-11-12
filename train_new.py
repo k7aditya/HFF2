@@ -19,7 +19,7 @@ from loss.loss_function import segmentation_loss
 from model.HFF_MobileNetV3_fixed import HFFNet
 from loader.dataload3d import get_loaders
 from warnings import simplefilter
-from explainability.mc_dropout import DropoutScheduler, MCDropoutUncertainty
+from explainability.mc_dropout_fixed import DropoutScheduler, MCDropoutUncertainty
 
 
 simplefilter(action='ignore', category=FutureWarning)
