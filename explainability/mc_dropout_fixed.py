@@ -1,4 +1,4 @@
-# MC-Dropout Uncertainty Estimation Module for HFF-Net (Fixed for 3D BraTS)
+# MC-Dropout Uncertainty Estimation Module for HFF-Net (CORRECTED)
 # Ensures dropout stays active and model is in proper train mode during inference
 
 import torch
@@ -16,42 +16,36 @@ class MCDropoutUncertainty:
     Performs multiple stochastic forward passes with dropout ACTIVE
     """
     
-    # --- MODIFIED __init__ ---
     def __init__(self, model: nn.Module, num_samples: int = 20, 
-                 device: str = 'cuda', save_dir: str = 'results/figures/uncertainty'):
+                device: str = 'cuda', save_dir: str = 'results/figures/uncertainty'):
         self.model = model
         self.num_samples = num_samples
         self.device = device
         self.save_dir = Path(save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
         
-        # --- FIX: Correct initialization sequence ---
-        # 1. Initialize the attribute as an empty list.
-        self.dropout_layers = []
-        
-        # 2. Call the mutator method to populate the list.
-        #    Do NOT assign its 'None' return value.
-        self._prepare_model()
-        # --- END FIX ---
+        self.dropout_layers = self._prepare_model()
     
-    # --- MODIFIED _prepare_model ---
-    def _prepare_model(self):
+    def _prepare_model(self) -> List:
         """
         Identify all dropout layers for MC sampling
+        
+        CRITICAL FIX: Now explicitly RETURNS the dropout_layers list
+        instead of leaving the return statement implicit (which returns None).
         """
-        # --- REFINEMENT: Removed redundant initialization ---
-        # self.dropout_layers = (This is now handled in __init__)
-
+        dropout_layers = []
         for module in self.model.modules():
             if isinstance(module, (nn.Dropout, nn.Dropout2d, nn.Dropout3d)):
-                self.dropout_layers.append(module)
+                dropout_layers.append(module)
         
-        if len(self.dropout_layers) == 0:
+        if len(dropout_layers) == 0:
             print("WARNING: No dropout layers found in model!")
         else:
-            print(f"Found {len(self.dropout_layers)} dropout layers for MC sampling")
+            print(f"Found {len(dropout_layers)} dropout layers for MC sampling")
+        
+        # FIX 1: Explicitly return the list
+        return dropout_layers
     
-    # --- RECOMMENDED NEW HELPER FUNCTION (Validated: Correct) ---
     def _set_mc_dropout_state(self, state: bool) -> None:
         """
         Sets the model state for MC-Dropout inference.
@@ -59,10 +53,15 @@ class MCDropoutUncertainty:
         Args:
             state (bool): 
                 True:  Sets model to `eval()` mode, then selectively
-                       re-enables ONLY dropout layers to `train()` mode.
-                       This freezes BatchNorm layers.
+                    re-enables ONLY dropout layers to `train()` mode.
+                    This freezes BatchNorm layers.
                 False: Sets the entire model back to standard `eval()` mode.
         """
+        # FIX 2: Add safety check for None (defensive programming)
+        if self.dropout_layers is None:
+            print("ERROR: dropout_layers is None. Model preparation failed!")
+            return
+            
         if state:
             # 1. Set entire model to eval mode
             # This freezes BatchNorm running statistics
@@ -81,29 +80,18 @@ class MCDropoutUncertainty:
             # Restore the model to standard eval mode
             self.model.eval()
 
-    # --- DEPRECATED ORIGINAL FUNCTIONS (Retained as reference) ---
-    # def enable_dropout_inference(self):...
-    # def disable_dropout_inference(self):...
-    # These are replaced by the more robust `_set_mc_dropout_state` helper.
-
-    # --- CORRECTED FUNCTION ---
     def mc_forward_pass(self, input1: torch.Tensor, input2: torch.Tensor) -> List:
         """
         Perform N stochastic forward passes with dropout ACTIVE
         
         CRITICAL FIXES (Revised):
         1. Call `_set_mc_dropout_state(True)` to freeze BatchNorm
-           and activate Dropout.
+        and activate Dropout.
         2. Use torch.no_grad() (User's correct implementation).
         3. Handle multi-input and tuple-output (User's correct implementation).
         4. Restore model state with `_set_mc_dropout_state(False)`.
         """
         outputs = []
-        
-        # --- CRITICAL FIX: REMOVED FLAWED LOGIC ---
-        # REMOVED: was_training = self.model.training
-        # REMOVED: self.model.train()  (This was the CRITICAL FLAW )
-        # REMOVED: self.enable_dropout_inference()
         
         try:
             # 1. Set model to the *correct* MC-Dropout inference state
@@ -115,14 +103,10 @@ class MCDropoutUncertainty:
                     # 3. Handle HFF-Net multi-input (correct)
                     output = self.model(input1, input2)
                     
-                    # 3. Handle tuple output
-                    # --- BUGFIX-2: Corrected latent bug ---
-                    # The original 'output = output' was non-functional.
-                    # This now correctly selects the first element.
+                    # 3. Handle tuple output (correct)
                     if isinstance(output, tuple):
-                        output = output  # Take first output
-                    # --- END BUGFIX-2 ---
-                        
+                        output = output[0]  # Take first output
+                    
                     # Store logits on CPU (correct)
                     outputs.append(output.cpu())
                     
@@ -135,8 +119,6 @@ class MCDropoutUncertainty:
         finally:
             # 4. Restore model to a clean, standard inference state
             self._set_mc_dropout_state(False)
-            
-        # --- END RECOMMENDED MODIFICATION ---
 
         # Final variance check (retained from original)
         if len(outputs) > 1:
@@ -150,7 +132,6 @@ class MCDropoutUncertainty:
         
         return outputs
     
-    # --- ORIGINAL FUNCTION (Validated: Correct) ---
     def compute_uncertainty_maps(self, outputs: List) -> Tuple[np.ndarray, np.ndarray]:
         """
         Compute mean prediction and uncertainty from MC samples
@@ -178,7 +159,6 @@ class MCDropoutUncertainty:
         
         return mean_pred.numpy(), uncertainty.numpy()
 
-    # --- RECOMMENDED ADVANCED METRICS FUNCTION (Validated: Correct) ---
     def compute_advanced_uncertainty_maps(
         self, 
         logit_outputs: List, 
@@ -197,9 +177,9 @@ class MCDropoutUncertainty:
         
         Args:
             logit_outputs: List of N logit tensors (B, C, D, H, W)
-                           from mc_forward_pass. The list has length N.
+                        from mc_forward_pass. The list has length N.
             epsilon: Small value for numerical stability (to avoid log(0)).
-                     
+                        
         Returns:
             Tuple of (mean_probs, predictive_entropy, mutual_information, expected_entropy)
             - mean_probs: (B, C, D, H, W)
@@ -257,14 +237,11 @@ class MCDropoutUncertainty:
         )
 
 
-# --- NO CHANGES (ORIGINAL CODE WAS ROBUST) ---
 class DropoutScheduler:
     """
     Manage dropout rates during training
     
     CRITICAL FIX: Maintain minimum dropout rate for MC-Dropout uncertainty
-    (This class is a robust and valid utility for ensuring MC-Dropout
-    remains possible, as it is sensitive to the dropout rate )
     """
     
     def __init__(self, model: nn.Module, base_dropout: float = 0.5, min_dropout: float = 0.2):
@@ -299,6 +276,7 @@ class DropoutScheduler:
         """Disable dropout for standard inference"""
         for module in self.dropout_layers:
             module.eval()
+
 
 # Export
 __all__ = ['MCDropoutUncertainty', 'DropoutScheduler']
