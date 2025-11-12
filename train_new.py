@@ -308,9 +308,9 @@ if __name__ == '__main__':
     for epoch in range(args.num_epochs):
 
         # Linearly decay dropout rate from 0.5 to 0.1 over training
-        current_dropout = 0.5 - 0.3 * (epoch / args.num_epochs)
+        current_dropout = 0.5 - 0.4 * (epoch / args.num_epochs)
         dropout_scheduler.set_dropout_rate(max(current_dropout, 0.1))
-        print(f"Epoch {epoch+1} - Dropout rate set to {max(current_dropout, 0.2):.4f}")
+        print(f"Epoch {epoch+1} - Dropout rate set to {max(current_dropout, 0.1):.4f}")
 
         count_iter += 1
         if (count_iter - 1) % args.display_iter == 0:

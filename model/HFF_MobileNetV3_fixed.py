@@ -355,7 +355,7 @@ upsampled_laplacian = laplacian_3x3
 
 
 class HFFNet(nn.Module):
-    def __init__(self, in_chs1, in_chs2, num_classes, dropout_p=0.2):
+    def __init__(self, in_chs1, in_chs2, num_classes, dropout_p=0.1):
         super().__init__()
         self.dropout_p = dropout_p
         self.laplacian_target = nn.Parameter(upsampled_laplacian.repeat(16, 16, 1, 1, 1), requires_grad=False)
@@ -481,12 +481,12 @@ class HFFNet(nn.Module):
         return decode_LF_1, decode_HF_1, decode_LF_3side, decode_HF_3side
 
 
-def hff_net(in_chs1, in_chs2, num_classes, dropout_p=0.2):
+def hff_net(in_chs1, in_chs2, num_classes, dropout_p=0.1):
     return HFFNet(in_chs1, in_chs2, num_classes, dropout_p=dropout_p)
 
 
 if __name__ == "__main__":
-    model = hff_net(4, 16, 4, dropout_p=0.2).cuda()
+    model = hff_net(4, 16, 4, dropout_p=0.1).cuda()
     input1 = torch.rand(1, 4, 128, 128, 128).cuda()
     input2 = torch.rand(1, 16, 128, 128, 128).cuda()
     print("=" * 80)
