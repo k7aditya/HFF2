@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributions as td
- 
+
 
 BatchNorm3d = nn.InstanceNorm3d
 BN_MOMENTUM = 0.1
@@ -64,7 +64,7 @@ class InvertedResidualBlock3D(nn.Module):
                 nn.Conv3d(in_channels, hidden_dim, 1, bias=False),
                 BatchNorm3d(hidden_dim, momentum=BN_MOMENTUM),
                 act(inplace=True),
-                nn.Dropout3d(p=dropout_p)  # ADD DROPOUT after expansion
+                nn.Dropout3d(p=dropout_p)
             ])
         else:
             hidden_dim = in_channels
@@ -72,7 +72,7 @@ class InvertedResidualBlock3D(nn.Module):
             nn.Conv3d(hidden_dim, hidden_dim, 3, stride=stride, padding=1, groups=hidden_dim, bias=False),
             BatchNorm3d(hidden_dim, momentum=BN_MOMENTUM),
             act(inplace=True),
-            nn.Dropout3d(p=dropout_p)  # ADD DROPOUT after depthwise conv
+            nn.Dropout3d(p=dropout_p)
         ])
         if use_se:
             layers.append(SqueezeExcitation3D(hidden_dim))
@@ -95,7 +95,7 @@ class MobileNetV3Encoder3D(nn.Module):
             nn.Conv3d(in_channels, 16, 3, 1, 1, bias=False),
             BatchNorm3d(16, momentum=BN_MOMENTUM),
             HardSwish(inplace=True),
-            nn.Dropout3d(p=dropout_p)  # ADD DROPOUT in stem
+            nn.Dropout3d(p=dropout_p)
         )
         self.enc1 = InvertedResidualBlock3D(16, 16, expand_ratio=1, stride=1, use_se=True, activation='RE', dropout_p=dropout_p)
         self.enc2 = InvertedResidualBlock3D(16, 32, expand_ratio=4.5, stride=2, use_se=False, activation='RE', dropout_p=dropout_p)
@@ -120,7 +120,7 @@ class UpsampleConv(nn.Module):
             nn.Conv3d(in_chs, out_chs, 3, 1, 1, bias=True),
             BatchNorm3d(out_chs, momentum=BN_MOMENTUM),
             ActivationFunction(inplace=relu_inplace),
-            nn.Dropout3d(p=dropout_p)  # ADD DROPOUT in decoder
+            nn.Dropout3d(p=dropout_p)
         )
     def forward(self, x):
         return self.up(x)
@@ -133,7 +133,7 @@ class DownsampleConv(nn.Module):
             nn.Conv3d(in_chs, out_chs, 3, 2, 1, bias=False),
             BatchNorm3d(out_chs, momentum=BN_MOMENTUM),
             ActivationFunction(inplace=relu_inplace),
-            nn.Dropout3d(p=dropout_p)  # ADD DROPOUT
+            nn.Dropout3d(p=dropout_p)
         )
     def forward(self, x):
         return self.down(x)
@@ -146,7 +146,7 @@ class SameSizeConv(nn.Module):
             nn.Conv3d(in_chs, out_chs, 3, 1, 1, bias=False),
             BatchNorm3d(out_chs, momentum=BN_MOMENTUM),
             ActivationFunction(inplace=relu_inplace),
-            nn.Dropout3d(p=dropout_p)  # ADD DROPOUT
+            nn.Dropout3d(p=dropout_p)
         )
     def forward(self, x):
         return self.same(x)
@@ -159,7 +159,7 @@ class TransitionConv(nn.Module):
             nn.Conv3d(in_chs, out_chs, 1, 1, 0, bias=False),
             BatchNorm3d(out_chs, momentum=BN_MOMENTUM),
             ActivationFunction(inplace=relu_inplace),
-            nn.Dropout3d(p=dropout_p)  # ADD DROPOUT   
+            nn.Dropout3d(p=dropout_p)
         )
     def forward(self, x):
         return self.transition(x)
@@ -173,15 +173,15 @@ class SideTransition(nn.Module):
             nn.Conv3d(32, 16, 3, 1, 1, bias=True),
             nn.InstanceNorm3d(16, momentum=0.1),
             nn.ReLU(inplace=True),
-            nn.Dropout3d(p=dropout_p),  # ADD DROPOUT
+            nn.Dropout3d(p=dropout_p),
             nn.Conv3d(16, 8, 3, 1, 1, bias=True),
             nn.InstanceNorm3d(8, momentum=0.1),
             nn.ReLU(inplace=True),
-            nn.Dropout3d(p=dropout_p),  # ADD DROPOUT
+            nn.Dropout3d(p=dropout_p),
             nn.Conv3d(8, 4, 3, 1, 1, bias=True),
             nn.InstanceNorm3d(4, momentum=0.1),
             nn.ReLU(inplace=True),
-            nn.Dropout3d(p=dropout_p))  # ADD DROPOUT
+            nn.Dropout3d(p=dropout_p))
     def forward(self, x):
         return self.up(x)
 
@@ -193,7 +193,7 @@ class CustomBlock(nn.Module):
         self.conv1 = conv3x3(in_chs, out_chs, stride)
         self.bn1 = norm_layer(out_chs, momentum=BN_MOMENTUM)
         self.relu = ActivationFunction(inplace=relu_inplace)
-        self.dropout = nn.Dropout3d(p=dropout_p)  # ADD DROPOUT
+        self.dropout = nn.Dropout3d(p=dropout_p)
         self.conv2 = conv3x3(out_chs, out_chs)
         self.bn2 = norm_layer(out_chs, momentum=BN_MOMENTUM)
         self.downsample = downsample
@@ -203,7 +203,7 @@ class CustomBlock(nn.Module):
         out = self.conv1(x)
         out = self.bn1(out)
         out = self.relu(out)
-        out = self.dropout(out)  # APPLY DROPOUT
+        out = self.dropout(out)
         out = self.conv2(out)
         if self.downsample is not None:
             identity = self.downsample(x)
@@ -355,7 +355,7 @@ upsampled_laplacian = laplacian_3x3
 
 
 class HFFNet(nn.Module):
-    def __init__(self, in_chs1, in_chs2, num_classes, dropout_p=0.1):
+    def __init__(self, in_chs1, in_chs2, num_classes, dropout_p=0.2):
         super().__init__()
         self.dropout_p = dropout_p
         self.laplacian_target = nn.Parameter(upsampled_laplacian.repeat(16, 16, 1, 1, 1), requires_grad=False)
@@ -365,48 +365,65 @@ class HFFNet(nn.Module):
         self.LF_l5_FDCA = FrequencyCrossAttention(256, 8)
         self.HF_l4_FDCA = FrequencyCrossAttention(128, 16)
         self.HF_l5_FDCA = FrequencyCrossAttention(256, 8)
-        self.x1_3side = SideTransition(dropout_p=dropout_p)
-        self.x2_3side = SideTransition(dropout_p=dropout_p)
+        self.x1_3side = SideTransition(dropout_p=0.1)  # Reduced dropout
+        self.x2_3side = SideTransition(dropout_p=0.1)  # Reduced dropout
         self.mobilenet_encoder_b1 = MobileNetV3Encoder3D(in_chs1, dropout_p=dropout_p)
         self.mobilenet_encoder_b2 = MobileNetV3Encoder3D(in_chs2, dropout_p=dropout_p)
-        self.l4_b1_2 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l4_b1_d2 = DownsampleConv(128, 128, dropout_p=dropout_p)
-        self.l4_b1_s = SameSizeConv(128, 128, dropout_p=dropout_p)
-        self.l4_b1_t = TransitionConv(128 + 256 + 128, 128, dropout_p=dropout_p)
-        self.l4_b1_3 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l4_b1_4 = CustomBlock(128 + 128, 128, downsample=nn.Sequential(conv1x1(128 + 128, 128), BatchNorm3d(128, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
-        self.l4_b1_u = UpsampleConv(128, 64, dropout_p=dropout_p)
-        self.l5_b1_1 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l5_b1_u = UpsampleConv(256, 256, dropout_p=dropout_p)
-        self.l5_b1_s = SameSizeConv(256, 256, dropout_p=dropout_p)
-        self.l5_b1_t = TransitionConv(256 + 256 + 128, 256, dropout_p=dropout_p)
-        self.l5_b1_2 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l5_b1_u2 = UpsampleConv(256, 128, dropout_p=dropout_p)
-        self.l3_b1_2 = CustomBlock(64 + 64, 64, downsample=nn.Sequential(conv1x1(64 + 64, 64), BatchNorm3d(64, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
-        self.l3_b1_u = UpsampleConv(64, 32, dropout_p=dropout_p)
-        self.l2_b1_2 = CustomBlock(32 + 32, 32, downsample=nn.Sequential(conv1x1(32 + 32, 32), BatchNorm3d(32, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
-        self.l2_b1_u = UpsampleConv(32, 16, dropout_p=dropout_p)
+        
+        # ===== ENCODER BLOCKS: HIGH DROPOUT (0.2-0.3) =====
+        self.l4_b1_2 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=0.25)
+        self.l4_b1_d2 = DownsampleConv(128, 128, dropout_p=0.2)
+        self.l4_b1_s = SameSizeConv(128, 128, dropout_p=0.2)
+        self.l4_b1_t = TransitionConv(128 + 256 + 128, 128, dropout_p=0.2)
+        self.l4_b1_3 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=0.25)
+        self.l4_b1_4 = CustomBlock(128 + 128, 128, downsample=nn.Sequential(conv1x1(128 + 128, 128), BatchNorm3d(128, momentum=BN_MOMENTUM)), dropout_p=0.2)
+        self.l4_b1_u = UpsampleConv(128, 64, dropout_p=0.2)
+        
+        self.l5_b1_1 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=0.3)
+        self.l5_b1_u = UpsampleConv(256, 256, dropout_p=0.2)
+        self.l5_b1_s = SameSizeConv(256, 256, dropout_p=0.2)
+        self.l5_b1_t = TransitionConv(256 + 256 + 128, 256, dropout_p=0.2)
+        self.l5_b1_2 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=0.3)
+        self.l5_b1_u2 = UpsampleConv(256, 128, dropout_p=0.2)
+        
+        # ===== MID DECODER: MEDIUM DROPOUT (0.15) =====
+        self.l3_b1_2 = CustomBlock(64 + 64, 64, downsample=nn.Sequential(conv1x1(64 + 64, 64), BatchNorm3d(64, momentum=BN_MOMENTUM)), dropout_p=0.15)
+        self.l3_b1_u = UpsampleConv(64, 32, dropout_p=0.15)
+        
+        # ===== FINAL DECODER: LOW DROPOUT (0.1) =====
+        self.l2_b1_2 = CustomBlock(32 + 32, 32, downsample=nn.Sequential(conv1x1(32 + 32, 32), BatchNorm3d(32, momentum=BN_MOMENTUM)), dropout_p=0.1)
+        self.l2_b1_u = UpsampleConv(32, 16, dropout_p=0.1)
+        
+        # ===== OUTPUT LAYER: NO DROPOUT (0.0) =====
         self.l1_b1_2 = CustomBlock(16 + 16, 16, downsample=nn.Sequential(conv1x1(16 + 16, 16), BatchNorm3d(16, momentum=BN_MOMENTUM)), dropout_p=0.0)
-        self.l1_b1_f = nn.Conv3d(16, num_classes, 1)
-        self.l4_b2_2 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l4_b2_d2 = DownsampleConv(128, 128, dropout_p=dropout_p)
-        self.l4_b2_s = SameSizeConv(128, 128, dropout_p=dropout_p)
-        self.l4_b2_t = TransitionConv(128 + 256 + 128, 128, dropout_p=dropout_p)
-        self.l4_b2_3 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l4_b2_4 = CustomBlock(128 + 128, 128, downsample=nn.Sequential(conv1x1(128 + 128, 128), BatchNorm3d(128, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
-        self.l4_b2_u = UpsampleConv(128, 64, dropout_p=dropout_p)
-        self.l5_b2_1 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l5_b2_u = UpsampleConv(256, 256, dropout_p=dropout_p)
-        self.l5_b2_s = SameSizeConv(256, 256, dropout_p=dropout_p)
-        self.l5_b2_t = TransitionConv(256 + 256 + 128, 256, dropout_p=dropout_p)
-        self.l5_b2_2 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
-        self.l5_b2_u2 = UpsampleConv(256, 128, dropout_p=dropout_p)
-        self.l3_b2_2 = CustomBlock(64 + 64, 64, downsample=nn.Sequential(conv1x1(64 + 64, 64), BatchNorm3d(64, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
-        self.l3_b2_u = UpsampleConv(64, 32, dropout_p=dropout_p)
-        self.l2_b2_2 = CustomBlock(32 + 32, 32, downsample=nn.Sequential(conv1x1(32 + 32, 32), BatchNorm3d(32, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
-        self.l2_b2_u = UpsampleConv(32, 16, dropout_p=dropout_p)
+        self.l1_b1_f = nn.Conv3d(16, num_classes, 1)  # NO DROPOUT BEFORE OUTPUT
+        
+        # ===== HF BRANCH: SAME GRADUATED DROPOUT STRATEGY =====
+        self.l4_b2_2 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=0.25)
+        self.l4_b2_d2 = DownsampleConv(128, 128, dropout_p=0.2)
+        self.l4_b2_s = SameSizeConv(128, 128, dropout_p=0.2)
+        self.l4_b2_t = TransitionConv(128 + 256 + 128, 128, dropout_p=0.2)
+        self.l4_b2_3 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=0.25)
+        self.l4_b2_4 = CustomBlock(128 + 128, 128, downsample=nn.Sequential(conv1x1(128 + 128, 128), BatchNorm3d(128, momentum=BN_MOMENTUM)), dropout_p=0.2)
+        self.l4_b2_u = UpsampleConv(128, 64, dropout_p=0.2)
+        
+        self.l5_b2_1 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=0.3)
+        self.l5_b2_u = UpsampleConv(256, 256, dropout_p=0.2)
+        self.l5_b2_s = SameSizeConv(256, 256, dropout_p=0.2)
+        self.l5_b2_t = TransitionConv(256 + 256 + 128, 256, dropout_p=0.2)
+        self.l5_b2_2 = InvertedResidualBlock3D(256, 256, expand_ratio=6, stride=1, use_se=True, activation='HS', dropout_p=0.3)
+        self.l5_b2_u2 = UpsampleConv(256, 128, dropout_p=0.2)
+        
+        self.l3_b2_2 = CustomBlock(64 + 64, 64, downsample=nn.Sequential(conv1x1(64 + 64, 64), BatchNorm3d(64, momentum=BN_MOMENTUM)), dropout_p=0.15)
+        self.l3_b2_u = UpsampleConv(64, 32, dropout_p=0.15)
+        
+        self.l2_b2_2 = CustomBlock(32 + 32, 32, downsample=nn.Sequential(conv1x1(32 + 32, 32), BatchNorm3d(32, momentum=BN_MOMENTUM)), dropout_p=0.1)
+        self.l2_b2_u = UpsampleConv(32, 16, dropout_p=0.1)
+        
+        # ===== HF OUTPUT LAYER: NO DROPOUT (0.0) =====
         self.l1_b2_2 = CustomBlock(16 + 16, 16, downsample=nn.Sequential(conv1x1(16 + 16, 16), BatchNorm3d(16, momentum=BN_MOMENTUM)), dropout_p=0.0)
-        self.l1_b2_f = nn.Conv3d(16, num_classes, 1)
+        self.l1_b2_f = nn.Conv3d(16, num_classes, 1)  # NO DROPOUT BEFORE OUTPUT
+        
         for m in self.modules():
             if isinstance(m, HighFreqConv): continue
             if isinstance(m, nn.Conv3d):
@@ -415,10 +432,12 @@ class HFFNet(nn.Module):
             elif isinstance(m, nn.Linear):
                 nn.init.normal_(m.weight, std=0.001)
                 if m.bias is not None: nn.init.constant_(m.bias, 0)
+    
     def forward(self, input1, input2):
         layer1_LF, layer2_LF, layer3_LF, layer4_LF_1, layer5_LF_1 = self.mobilenet_encoder_b1(input1)
         input2 = self.input_ed(input2)
         layer1_HF, layer2_HF, layer3_HF, layer4_HF_1, layer5_HF_1 = self.mobilenet_encoder_b2(input2)
+        
         # Low-Freq
         layer4_LF_2 = self.l4_b1_2(layer4_LF_1)
         layer4_LF_3_d = self.l4_b1_d2(layer4_LF_2)
@@ -428,6 +447,7 @@ class HFFNet(nn.Module):
         layer5_LF_u = self.l5_b1_u(layer5_LF_1)
         layer5_LF_s = self.l5_b1_s(layer5_LF_1)
         layer5_LF_s = self.LF_l5_FDCA(layer5_LF_s)
+        
         # High-Freq
         layer4_HF_2 = self.l4_b2_2(layer4_HF_1)
         layer4_HF_3_d = self.l4_b2_d2(layer4_HF_2)
@@ -437,7 +457,8 @@ class HFFNet(nn.Module):
         layer5_HF_u = self.l5_b2_u(layer5_HF_1)
         layer5_HF_s = self.l5_b2_s(layer5_HF_1)
         layer5_HF_s = self.HF_l5_FDCA(layer5_HF_s)
-        # Mixer/Decoder downstream unchanged
+        
+        # Mixer/Decoder
         merge_LF_5_3 = torch.cat((layer5_LF_s, layer5_HF_s, layer4_HF_3_d), dim=1)
         merge_LF_5_3 = self.l5_b1_t(merge_LF_5_3)
         merge_LF_5_3 = self.l5_b1_2(merge_LF_5_3)
@@ -448,6 +469,7 @@ class HFFNet(nn.Module):
         merge_LF_4_4 = torch.cat((merge_LF_4_4, merge_LF_5_3), dim=1)
         merge_LF_4_4 = self.l4_b1_4(merge_LF_4_4)
         merge_LF_4_4 = self.l4_b1_u(merge_LF_4_4)
+        
         merge_HF_5_3 = torch.cat((layer5_HF_s, layer5_LF_s, layer4_LF_3_d), dim=1)
         merge_HF_5_3 = self.l5_b2_t(merge_HF_5_3)
         merge_HF_5_3 = self.l5_b2_2(merge_HF_5_3)
@@ -458,6 +480,7 @@ class HFFNet(nn.Module):
         merge_HF_4_4 = torch.cat((merge_HF_4_4, merge_HF_5_3), dim=1)
         merge_HF_4_4 = self.l4_b2_4(merge_HF_4_4)
         merge_HF_4_4 = self.l4_b2_u(merge_HF_4_4)
+        
         decode_LF_3 = torch.cat((layer3_LF, merge_LF_4_4), dim=1)
         decode_LF_3 = self.l3_b1_2(decode_LF_3)
         decode_LF_3 = self.l3_b1_u(decode_LF_3)
@@ -466,8 +489,9 @@ class HFFNet(nn.Module):
         decode_LF_2 = self.l2_b1_2(decode_LF_2)
         decode_LF_2 = self.l2_b1_u(decode_LF_2)
         decode_LF_1 = torch.cat((layer1_LF, decode_LF_2), dim=1)
-        decode_LF_1 = self.l1_b1_2(decode_LF_1)
-        decode_LF_1 = self.l1_b1_f(decode_LF_1)
+        decode_LF_1 = self.l1_b1_2(decode_LF_1)  # NO DROPOUT
+        decode_LF_1 = self.l1_b1_f(decode_LF_1)  # OUTPUT
+        
         decode_HF_3 = torch.cat((layer3_HF, merge_HF_4_4), dim=1)
         decode_HF_3 = self.l3_b2_2(decode_HF_3)
         decode_HF_3 = self.l3_b2_u(decode_HF_3)
@@ -476,21 +500,23 @@ class HFFNet(nn.Module):
         decode_HF_2 = self.l2_b2_2(decode_HF_2)
         decode_HF_2 = self.l2_b2_u(decode_HF_2)
         decode_HF_1 = torch.cat((layer1_HF, decode_HF_2), dim=1)
-        decode_HF_1 = self.l1_b2_2(decode_HF_1)
-        decode_HF_1 = self.l1_b2_f(decode_HF_1)
+        decode_HF_1 = self.l1_b2_2(decode_HF_1)  # NO DROPOUT
+        decode_HF_1 = self.l1_b2_f(decode_HF_1)  # OUTPUT
+        
         return decode_LF_1, decode_HF_1, decode_LF_3side, decode_HF_3side
 
 
-def hff_net(in_chs1, in_chs2, num_classes, dropout_p=0.1):
+def hff_net(in_chs1, in_chs2, num_classes, dropout_p=0.2):
     return HFFNet(in_chs1, in_chs2, num_classes, dropout_p=dropout_p)
 
 
 if __name__ == "__main__":
-    model = hff_net(4, 16, 4, dropout_p=0.1).cuda()
+    model = hff_net(4, 16, 4, dropout_p=0.2).cuda()
     input1 = torch.rand(1, 4, 128, 128, 128).cuda()
     input2 = torch.rand(1, 16, 128, 128, 128).cuda()
     print("=" * 80)
-    print("MODIFIED HFF-NET WITH MOBILENETV3-SMALL ENCODER + MC-DROPOUT SUPPORT")
+    print("CORRECTED HFF-NET WITH GRADUATED MC-DROPOUT STRATEGY")
+    print("Dropout strategy: Encoder HIGH (0.2-0.3) -> MidDecoder MEDIUM (0.15) -> FinalDecoder LOW (0.1-0.0) -> Output ZERO")
     print("=" * 80)
     x1_1_main, x1_1_aux1, x2, x3 = model(input1, input2)
     print("\nOutput shapes:")
@@ -507,4 +533,10 @@ if __name__ == "__main__":
     # Check dropout layers
     dropout_count = sum(1 for m in model.modules() if isinstance(m, nn.Dropout3d))
     print(f"  Dropout3d layers: {dropout_count}")
+    
+    # Verify no NaNs in output
+    if torch.isnan(x1_1_main).any():
+        print("  WARNING: NaN values detected in output!")
+    else:
+        print("  ✓ No NaN values in outputs")
     print("=" * 80)
