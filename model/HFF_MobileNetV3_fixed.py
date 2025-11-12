@@ -386,7 +386,7 @@ class HFFNet(nn.Module):
         self.l3_b1_u = UpsampleConv(64, 32, dropout_p=dropout_p)
         self.l2_b1_2 = CustomBlock(32 + 32, 32, downsample=nn.Sequential(conv1x1(32 + 32, 32), BatchNorm3d(32, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
         self.l2_b1_u = UpsampleConv(32, 16, dropout_p=dropout_p)
-        self.l1_b1_2 = CustomBlock(16 + 16, 16, downsample=nn.Sequential(conv1x1(16 + 16, 16), BatchNorm3d(16, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
+        self.l1_b1_2 = CustomBlock(16 + 16, 16, downsample=nn.Sequential(conv1x1(16 + 16, 16), BatchNorm3d(16, momentum=BN_MOMENTUM)), dropout_p=0.0)
         self.l1_b1_f = nn.Conv3d(16, num_classes, 1)
         self.l4_b2_2 = InvertedResidualBlock3D(128, 128, expand_ratio=4, stride=1, use_se=True, activation='HS', dropout_p=dropout_p)
         self.l4_b2_d2 = DownsampleConv(128, 128, dropout_p=dropout_p)
@@ -405,7 +405,7 @@ class HFFNet(nn.Module):
         self.l3_b2_u = UpsampleConv(64, 32, dropout_p=dropout_p)
         self.l2_b2_2 = CustomBlock(32 + 32, 32, downsample=nn.Sequential(conv1x1(32 + 32, 32), BatchNorm3d(32, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
         self.l2_b2_u = UpsampleConv(32, 16, dropout_p=dropout_p)
-        self.l1_b2_2 = CustomBlock(16 + 16, 16, downsample=nn.Sequential(conv1x1(16 + 16, 16), BatchNorm3d(16, momentum=BN_MOMENTUM)), dropout_p=dropout_p)
+        self.l1_b2_2 = CustomBlock(16 + 16, 16, downsample=nn.Sequential(conv1x1(16 + 16, 16), BatchNorm3d(16, momentum=BN_MOMENTUM)), dropout_p=0.0)
         self.l1_b2_f = nn.Conv3d(16, num_classes, 1)
         for m in self.modules():
             if isinstance(m, HighFreqConv): continue
