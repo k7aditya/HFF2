@@ -133,7 +133,7 @@ def compute_fisher_information(model, dataloader, criterion):
         low_freq_inputs = []
         high_freq_inputs = []
         for j in range(20):
-            input_tensor = data[j].unsqueeze(dim=1).type(device=device, dtype=torch.float)
+            input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
             if j in [0, 1, 2, 3]:
                 low_freq_inputs.append(input_tensor)
             else:
@@ -390,7 +390,7 @@ if __name__ == '__main__':
                     low_freq_inputs = []
                     high_freq_inputs = []
                     for j in range(20):
-                        input_tensor = data[j].unsqueeze(1).type(device=device, dtype=torch.float)
+                        input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
                         if j in [0,1,2,3]:
                             low_freq_inputs.append(input_tensor)
                         else:
@@ -436,7 +436,7 @@ if __name__ == '__main__':
             high_freq_inputs = []
 
             for j in range(20):
-                input_tensor = data[j].unsqueeze(dim=1).type(device=device, dtype=torch.float)
+                input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
                 if j in [0, 1, 2, 3]:
                     low_freq_inputs.append(input_tensor)
                 else:
@@ -511,7 +511,7 @@ if __name__ == '__main__':
                     high_freq_inputs = []
 
                     for j in range(20):
-                        input_tensor = data[j].unsqueeze(dim=1).type(device=device, dtype=torch.float)
+                        input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
                         if j in [0, 1, 2, 3]:
                             low_freq_inputs.append(input_tensor)
                         else:
