@@ -270,7 +270,7 @@ if __name__ == '__main__':
                        help='Epoch number to resume from (e.g., 61)')
     # ===== END RESUME ARGS =====
     # ===== FIX: ADD --local-rank ARGUMENT =====
-    parser.add_argument('--local_rank', type=int, default=-1,
+    parser.add_argument('--local-rank', type=int, default=-1,
                     help='Local rank from torch.distributed.launch (auto-set, ignore this)')
     # ===== END FIX =====
 
