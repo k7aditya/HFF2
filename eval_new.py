@@ -32,12 +32,12 @@ from pathlib import Path
 from warnings import simplefilter
  
 # XAI imports
-from attention_vis_updated import (
+from explainability.attention_vis import (
     EnhancedFDCAAttentionVisualizer,
     EnhancedSegmentationGradCAM,
     EnhancedFrequencyComponentAnalyzer
 )
-from freq_analysis_updated import EnhancedFrequencyDomainAnalyzer
+from explainability.freq_analysis import EnhancedFrequencyDomainAnalyzer
 
 # Existing project imports (update paths as needed)
 try:
