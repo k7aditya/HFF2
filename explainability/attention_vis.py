@@ -1,19 +1,13 @@
-# attention_vis_updated.py - Enhanced Attention Visualization Module
-# Updated with mechanistic interpretability and advanced techniques
+# attention_vis_CORRECTED.py
+# FIXES FOR 3D VOLUME HANDLING AND GRADIENT TRACKING
 
 """
-UPDATED ATTENTION VISUALIZATION MODULE FOR HFF-NET
-====================================================
-
-Enhanced with:
-1. Grad-CAM++ for better multi-instance attention
-2. Guided Grad-CAM with pixel-precision
-3. Layer-wise Relevance Propagation (LRP)
-4. Saliency maps from input gradients
-5. Feature importance from activations
-6. 600 DPI high-resolution output
-7. Uncertainty-aware attention maps
-8. Feature circuit visualization
+CORRECTED ATTENTION VISUALIZATION - Handles 3D BraTS Data Properly
+Key fixes:
+1. Extract 2D slices from 3D volumes before visualization
+2. Proper gradient tracking for Grad-CAM
+3. Robust tensor to numpy conversion
+4. Type checking and casting
 """
 
 import torch
@@ -32,12 +26,9 @@ from scipy import ndimage
 import warnings
 warnings.filterwarnings('ignore')
 
-# ============================================================================
-# SECTION 1: ENHANCED FDCA ATTENTION VISUALIZER
-# ============================================================================
 
 class EnhancedFDCAAttentionVisualizer:
-    """Enhanced FDCA attention extraction with mechanistic interpretability"""
+    """Enhanced FDCA attention extraction with 3D volume handling"""
     
     def __init__(self, device='cuda', save_dir='results/figures/xai/attention', dpi=600):
         self.device = device
@@ -74,7 +65,7 @@ class EnhancedFDCAAttentionVisualizer:
             hook.remove()
         self.hooks = []
     
-    def extract_attention_maps(self, batch: torch.Tensor, model, layer_name: Optional[str] = None, 
+    def extract_attention_maps(self, batch: torch.Tensor, model, layer_name: Optional[str] = None,
                               lf_channels: int = 4) -> Dict:
         """Extract attention maps with enhanced error handling"""
         self.attention_maps.clear()
@@ -106,7 +97,7 @@ class EnhancedFDCAAttentionVisualizer:
         
         for _, attn in attention_maps.items():
             if attn.ndim == 5:  # (B, C, D, H, W)
-                attn_spatial = attn.mean(dim=(1, 2))  # (B, H, W)
+                attn_spatial = attn.mean(dim=(1, 2))  # Average over C and D, get (B, H, W)
             elif attn.ndim == 4:  # (B, C, H, W)
                 attn_spatial = attn.mean(dim=1)  # (B, H, W)
             else:
@@ -139,22 +130,14 @@ class EnhancedFDCAAttentionVisualizer:
         
         return aggregated
     
-    def compute_feature_importance(self, activations: Dict) -> Dict:
-        """Compute which features are most important"""
-        importance_scores = {}
-        
-        for layer_name, act_array in activations.items():
-            if act_array.ndim >= 2:
-                # Variance across batch and spatial dimensions
-                spatial_var = np.var(act_array, axis=tuple(range(1, act_array.ndim)))
-                importance_scores[layer_name] = spatial_var
-        
-        return importance_scores
-    
     def visualize_attention_enhanced(self, input_img: np.ndarray, attention_map: torch.Tensor,
                                      uncertainty_map: Optional[np.ndarray] = None,
                                      output_path: Path = None, cmap='hot', alpha=0.5, dpi=600):
-        """Enhanced attention visualization with uncertainty overlay"""
+        """Enhanced attention visualization with 3D volume handling"""
+        
+        # ===== FIX 1: Handle 3D volumes =====
+        if input_img.ndim == 3:
+            input_img = input_img[input_img.shape[0] // 2]  # Extract middle slice
         
         # Handle single channel
         if len(input_img.shape) == 2:
@@ -164,13 +147,18 @@ class EnhancedFDCAAttentionVisualizer:
         if input_img.max() > 1:
             input_img = input_img / (input_img.max() + 1e-8)
         
-        # Convert attention
+        # ===== FIX 2: Convert attention to numpy properly =====
         if isinstance(attention_map, torch.Tensor):
-            attention_map = attention_map.numpy()
+            attention_map = attention_map.cpu().numpy()  # Move to CPU first
         
-        # Resize
+        # ===== FIX 3: Handle 3D attention maps =====
+        if attention_map.ndim == 3:
+            attention_map = attention_map[attention_map.shape[0] // 2]
+        
+        # ===== FIX 4: Resize with proper type casting =====
         if attention_map.shape != input_img.shape[:2]:
-            attention_map = cv2.resize(attention_map, (input_img.shape[1], input_img.shape[0]))
+            attention_map = cv2.resize(attention_map.astype(np.float32), 
+                                      (input_img.shape[1], input_img.shape[0]))
         
         # Create figure with high DPI
         fig, axes = plt.subplots(2, 2, figsize=(14, 12), dpi=dpi//100)
@@ -195,8 +183,13 @@ class EnhancedFDCAAttentionVisualizer:
         
         # Uncertainty overlay (if provided)
         if uncertainty_map is not None:
+            # ===== FIX 5: Handle 3D uncertainty maps =====
+            if uncertainty_map.ndim == 3:
+                uncertainty_map = uncertainty_map[uncertainty_map.shape[0] // 2]
+            
             if uncertainty_map.shape != input_img.shape[:2]:
-                uncertainty_map = cv2.resize(uncertainty_map, (input_img.shape[1], input_img.shape[0]))
+                uncertainty_map = cv2.resize(uncertainty_map.astype(np.float32),
+                                            (input_img.shape[1], input_img.shape[0]))
             
             unc_colored = cm.get_cmap('hot')(uncertainty_map)[:, :, :3]
             unc_overlay = 0.7 * input_img + 0.3 * unc_colored
@@ -215,14 +208,10 @@ class EnhancedFDCAAttentionVisualizer:
         plt.close()
 
 
-# ============================================================================
-# SECTION 2: ENHANCED SEGMENTATION GRAD-CAM WITH 3D SUPPORT
-# ============================================================================
-
 class EnhancedSegmentationGradCAM:
-    """Enhanced Grad-CAM with 3D support, uncertainty integration, and mechanistic analysis"""
+    """Enhanced Grad-CAM with 3D support and proper gradient tracking"""
     
-    def __init__(self, model, target_layers: List[str], device='cuda', 
+    def __init__(self, model, target_layers: List[str], device='cuda',
                  save_dir='results/figures/xai/gradcam', dpi=600):
         self.model = model
         self.target_layers = target_layers
@@ -270,23 +259,26 @@ class EnhancedSegmentationGradCAM:
         self.hooks = []
     
     def generate_cam(self, input_tensor: Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]],
-                     target_class: int = 1, eigen_smooth: bool = True, 
+                     target_class: int = 1, eigen_smooth: bool = True,
                      lf_channels: int = 4) -> np.ndarray:
-        """Generate Grad-CAM with 3D support"""
+        """Generate Grad-CAM with proper gradient handling"""
         
         self.activations.clear()
         self.gradients.clear()
         
-        # Handle two-input model
+        # ===== FIX 6: Proper gradient tracking setup =====
         if isinstance(input_tensor, (tuple, list)) and len(input_tensor) == 2:
-            low = input_tensor[0].to(self.device)
-            high = input_tensor[1].to(self.device)
-            low.requires_grad_(True)
-            high.requires_grad_(True)
+            low = input_tensor[0].to(self.device).float()
+            high = input_tensor[1].to(self.device).float()
+            
+            # ===== FIX 7: Set requires_grad AFTER device placement =====
+            low = low.clone().detach().requires_grad_(True)
+            high = high.clone().detach().requires_grad_(True)
+            
             output = self.model(low, high)
         else:
-            x = input_tensor.to(self.device)
-            x.requires_grad_(True)
+            x = input_tensor.to(self.device).float()
+            x = x.clone().detach().requires_grad_(True)
             low = x[:, :lf_channels, ...]
             high = x[:, lf_channels:, ...]
             output = self.model(low, high)
@@ -321,7 +313,6 @@ class EnhancedSegmentationGradCAM:
             
             # Improved weighting: second-order gradients
             if gradients.ndim == 5:  # 3D
-                # Weights: grad^2 / (2*grad^2 + grad^3)
                 weights = (gradients ** 2).mean(dim=(2, 3, 4), keepdim=True)
                 weighted_act = (weights * activations).sum(dim=1, keepdim=True)
                 layer_cam = weighted_act.mean(dim=2).squeeze(1)
@@ -342,7 +333,10 @@ class EnhancedSegmentationGradCAM:
         
         if eigen_smooth:
             for i in range(cam.shape[0]):
-                cam[i] = gaussian_filter(cam[i], sigma=1.5)
+                if cam[i].ndim == 3:
+                    cam[i] = gaussian_filter(cam[i][cam[i].shape[0]//2], sigma=1.5)  # Extract 2D
+                else:
+                    cam[i] = gaussian_filter(cam[i], sigma=1.5)
         
         return cam
     
@@ -360,13 +354,19 @@ class EnhancedSegmentationGradCAM:
     def visualize_gradcam_enhanced(self, input_img: np.ndarray, cam: np.ndarray,
                                    seg_mask: np.ndarray, uncertainty_map: Optional[np.ndarray] = None,
                                    output_path: Path = None, dpi=600):
-        """Enhanced Grad-CAM visualization with 600 DPI output"""
+        """Enhanced Grad-CAM visualization with 3D handling"""
         
         if cam is None:
             return
         
         if cam.ndim == 3:
             cam = cam[0]
+        
+        # ===== FIX 8: Handle 3D volumes =====
+        if input_img.ndim == 3:
+            input_img = input_img[input_img.shape[0] // 2]
+        if seg_mask.ndim == 3:
+            seg_mask = seg_mask[seg_mask.shape[0] // 2]
         
         # Handle single channel
         if len(input_img.shape) == 2:
@@ -377,10 +377,11 @@ class EnhancedSegmentationGradCAM:
         
         # Resize CAM
         if cam.shape != input_img.shape[:2]:
-            cam = cv2.resize(cam, (input_img.shape[1], input_img.shape[0]))
+            cam = cv2.resize(cam.astype(np.float32), (input_img.shape[1], input_img.shape[0]))
         
         if seg_mask.shape != input_img.shape[:2]:
-            seg_mask = cv2.resize(seg_mask, (input_img.shape[1], input_img.shape[0]), 
+            seg_mask = cv2.resize(seg_mask.astype(np.float32), 
+                                 (input_img.shape[1], input_img.shape[0]),
                                  interpolation=cv2.INTER_NEAREST)
         
         # Create heatmap
@@ -388,7 +389,7 @@ class EnhancedSegmentationGradCAM:
         heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB) / 255.0
         overlay = 0.7 * input_img + 0.3 * heatmap
         
-        # Create enhanced figure
+        # Create figure
         if uncertainty_map is not None:
             fig, axes = plt.subplots(2, 3, figsize=(16, 10), dpi=dpi//100)
         else:
@@ -414,8 +415,12 @@ class EnhancedSegmentationGradCAM:
         
         # Add uncertainty if provided
         if uncertainty_map is not None:
+            if uncertainty_map.ndim == 3:
+                uncertainty_map = uncertainty_map[uncertainty_map.shape[0] // 2]
+            
             if uncertainty_map.shape != input_img.shape[:2]:
-                uncertainty_map = cv2.resize(uncertainty_map, (input_img.shape[1], input_img.shape[0]))
+                uncertainty_map = cv2.resize(uncertainty_map.astype(np.float32),
+                                            (input_img.shape[1], input_img.shape[0]))
             
             im2 = axes[0, 2].imshow(uncertainty_map, cmap='hot')
             axes[0, 2].set_title('Uncertainty Map', fontsize=14, fontweight='bold')
@@ -436,12 +441,8 @@ class EnhancedSegmentationGradCAM:
         plt.close()
 
 
-# ============================================================================
-# SECTION 3: ENHANCED FREQUENCY COMPONENT ANALYZER
-# ============================================================================
-
 class EnhancedFrequencyComponentAnalyzer:
-    """Analyze LF/HF contributions with mechanistic insights"""
+    """Analyze LF/HF contributions with 3D volume handling"""
     
     def __init__(self, device='cuda', save_dir='results/figures/xai/freq', dpi=600):
         self.device = device
@@ -449,7 +450,7 @@ class EnhancedFrequencyComponentAnalyzer:
         self.save_dir.mkdir(parents=True, exist_ok=True)
         self.dpi = dpi
     
-    def generate_lf_only_prediction(self, model, full_input: torch.Tensor, 
+    def generate_lf_only_prediction(self, model, full_input: torch.Tensor,
                                     lf_channels: int = 4) -> torch.Tensor:
         """LF-only prediction"""
         low = full_input[:, :lf_channels, ...].to(self.device)
@@ -482,7 +483,19 @@ class EnhancedFrequencyComponentAnalyzer:
                                                    ground_truth: np.ndarray,
                                                    output_path: Path = None,
                                                    dpi=600):
-        """Enhanced visualization with 600 DPI output"""
+        """Enhanced visualization with 3D volume handling"""
+        
+        # ===== FIX 9: Handle 3D volumes =====
+        if input_img.ndim == 3:
+            input_img = input_img[input_img.shape[0] // 2]
+        if lf_pred.ndim == 3:
+            lf_pred = lf_pred[lf_pred.shape[0] // 2]
+        if hf_pred.ndim == 3:
+            hf_pred = hf_pred[hf_pred.shape[0] // 2]
+        if full_pred.ndim == 3:
+            full_pred = full_pred[full_pred.shape[0] // 2]
+        if ground_truth.ndim == 3:
+            ground_truth = ground_truth[ground_truth.shape[0] // 2]
         
         fig, axes = plt.subplots(2, 3, figsize=(16, 10), dpi=dpi//100)
         
@@ -509,7 +522,7 @@ class EnhancedFrequencyComponentAnalyzer:
         axes[1, 1].axis('off')
         
         # Disagreement map
-        diff = np.abs(lf_pred - hf_pred).astype(np.float32)
+        diff = np.abs(lf_pred.astype(np.float32) - hf_pred.astype(np.float32))
         diff = (diff - diff.min()) / (diff.max() - diff.min() + 1e-8)
         im = axes[1, 2].imshow(diff, cmap='hot')
         axes[1, 2].set_title('LF vs HF Disagreement\n(Uncertainty)', fontsize=12, fontweight='bold')

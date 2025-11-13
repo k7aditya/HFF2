@@ -217,6 +217,7 @@ class EnhancedHFFNetEvaluator:
             print(f"[2] Generating attention maps...")
             try:
                 self.attention_viz.register_hooks(self.model)
+                self.model.eval()  
                 full_input = torch.cat([low_freq_input, high_freq_input], dim=1)
                 attn_maps = self.attention_viz.extract_attention_maps(full_input, self.model)
                 self.attention_viz.remove_hooks()
@@ -242,6 +243,7 @@ class EnhancedHFFNetEvaluator:
         if self.args and getattr(self.args, 'enable_gradcam', True):
             print(f"[3] Generating Grad-CAM...")
             try:
+                self.model.eval()  
                 full_input = torch.cat([low_freq_input, high_freq_input], dim=1)
                 
                 # Multi-class CAM
@@ -272,6 +274,7 @@ class EnhancedHFFNetEvaluator:
         if self.args and getattr(self.args, 'enable_frequency', True):
             print(f"[4] Analyzing frequency components...")
             try:
+                self.model.eval()  
                 full_input = torch.cat([low_freq_input, high_freq_input], dim=1)
                 
                 lf_pred = self.freq_component.generate_lf_only_prediction(
