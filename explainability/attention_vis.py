@@ -268,21 +268,31 @@ class EnhancedSegmentationGradCAM:
         
         # ===== FIX 6: Proper gradient tracking setup =====
         if isinstance(input_tensor, (tuple, list)) and len(input_tensor) == 2:
-            low = input_tensor[0].to(self.device).float()
-            high = input_tensor[1].to(self.device).float()
+            low = input_tensor.to(self.device).float()
+            high = input_tensor.to(self.device).float()
             
-            # ===== FIX 7: Set requires_grad AFTER device placement =====
-            low = low.clone().detach().requires_grad_(True)
-            high = high.clone().detach().requires_grad_(True)
+            # ✅ Set requires_grad=True EXPLICITLY
+            low.requires_grad = True
+            high.requires_grad = True
             
-            output = self.model(low, high)
+            # ✅ Ensure gradients are computed
+            if low.grad is not None:
+                low.grad.zero_()
+            if high.grad is not None:
+                high.grad.zero_()
+            
+            # ✅ NO with torch.no_grad() here!
+            output = self.model(low, high)  # ← Gradients ARE computed here
         else:
             x = input_tensor.to(self.device).float()
-            x = x.clone().detach().requires_grad_(True)
+            x.requires_grad = True
+            if x.grad is not None:
+                x.grad.zero_()
+            
             low = x[:, :lf_channels, ...]
             high = x[:, lf_channels:, ...]
-            output = self.model(low, high)
-        
+            output = self.model(low, high)   
+                 
         # Handle tuple outputs
         if isinstance(output, tuple):
             output_main = output[0]

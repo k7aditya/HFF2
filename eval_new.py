@@ -135,24 +135,35 @@ def mask_to_class_indices(mask, mapping):
 
 class EnhancedHFFNetEvaluator:
     """Complete evaluation pipeline with all XAI and uncertainty features"""
-    
+
     def __init__(self, model, device='cuda', output_dir='./outputs', args=None):
         self.model = model
         self.device = device
         self.output_dir = Path(output_dir)
         self.args = args
-        
-        # Create output directories
-        self.xai_dir = self.output_dir / 'xai'
-        self.xai_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Initialize XAI modules
+
+        # Run timestamp (used to create a unique folder for this evaluation run)
+        run_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        # final run directory: ./outputs/xai_YYYY-MM-DD_HH-MM-SS
+        self.run_dir = self.output_dir / f"xai_{run_timestamp}"
+        self.run_dir.mkdir(parents=True, exist_ok=True)
+
+        # Keep a top-level xai_dir reference (for backward compatibility)
+        self.xai_dir = self.run_dir
+
+        # Create subdirectories
+        (self.xai_dir / "attention").mkdir(parents=True, exist_ok=True)
+        (self.xai_dir / "gradcam").mkdir(parents=True, exist_ok=True)
+        (self.xai_dir / "freq_component").mkdir(parents=True, exist_ok=True)
+        (self.xai_dir / "freq_analysis").mkdir(parents=True, exist_ok=True)
+
+        # Initialize XAI modules with save_dir pointing into the timestamped run folder
         self.attention_viz = EnhancedFDCAAttentionVisualizer(
             device=device,
             save_dir=str(self.xai_dir / 'attention'),
             dpi=600
         )
-        
+
         self.gradcam = EnhancedSegmentationGradCAM(
             model=model,
             target_layers=['decoder', 'fusion', 'encoder'],
@@ -160,21 +171,21 @@ class EnhancedHFFNetEvaluator:
             save_dir=str(self.xai_dir / 'gradcam'),
             dpi=600
         )
-        
+
         self.freq_component = EnhancedFrequencyComponentAnalyzer(
             device=device,
             save_dir=str(self.xai_dir / 'freq_component'),
             dpi=600
         )
-        
+
         self.freq_analyzer = EnhancedFrequencyDomainAnalyzer(
             device=device,
             save_dir=str(self.xai_dir / 'freq_analysis'),
             dpi=600
         )
-        
+
         print(f"✓ XAI modules initialized")
-        print(f"✓ Output directory: {self.output_dir}")
+        print(f"✓ Run output directory: {self.run_dir}")
     
     def evaluate_batch(self, low_freq_input: torch.Tensor, high_freq_input: torch.Tensor,
                       mask_gt: torch.Tensor, sample_id: str = 'sample'):
