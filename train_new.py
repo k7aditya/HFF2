@@ -269,6 +269,10 @@ if __name__ == '__main__':
     parser.add_argument('--resume_epoch', type=int, default=0,
                        help='Epoch number to resume from (e.g., 61)')
     # ===== END RESUME ARGS =====
+    # ===== FIX: ADD --local-rank ARGUMENT =====
+    parser.add_argument('--local_rank', type=int, default=-1,
+                    help='Local rank from torch.distributed.launch (auto-set, ignore this)')
+    # ===== END FIX =====
 
     # Data arguments
     parser.add_argument('--train_list', type=str, default='./data/brats20/2-train.txt')
