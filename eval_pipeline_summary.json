@@ -1,0 +1,148 @@
+{
+  "file": "eval_new.py",
+  "classes": [
+    "Logger"
+  ],
+  "functions": [
+    "__init__",
+    "write",
+    "flush",
+    "setup_logging",
+    "init_seeds",
+    "make_label_mapping",
+    "mask_to_class_indices",
+    "__init__",
+    "evaluate_batch"
+  ],
+  "argparse_args": [
+    {
+      "flags": [
+        "--test_list"
+      ],
+      "default": "'./data/brats20/2-val.txt'",
+      "action": null,
+      "help": "Path to test volume list"
+    },
+    {
+      "flags": [
+        "--checkpoint"
+      ],
+      "default": "'./checkpoints/hff_best.pth'",
+      "action": null,
+      "help": "Path to model checkpoint"
+    },
+    {
+      "flags": [
+        "--dataset_name"
+      ],
+      "default": "'brats20'",
+      "action": null,
+      "help": null
+    },
+    {
+      "flags": [
+        "--class_type"
+      ],
+      "default": "'all'",
+      "action": null,
+      "help": null
+    },
+    {
+      "flags": [
+        "--selected_modal"
+      ],
+      "default": "[",
+      "action": null,
+      "help": null
+    },
+    {
+      "flags": [
+        "-b",
+        "--batch_size"
+      ],
+      "default": "1",
+      "action": null,
+      "help": null
+    },
+    {
+      "flags": [
+        "-l",
+        "--loss"
+      ],
+      "default": "'dice'",
+      "action": null,
+      "help": null
+    },
+    {
+      "flags": [
+        "--loss2"
+      ],
+      "default": "'ff'",
+      "action": null,
+      "help": null
+    },
+    {
+      "flags": [
+        "--output_dir"
+      ],
+      "default": "'./outputs'",
+      "action": null,
+      "help": "Output directory for results"
+    },
+    {
+      "flags": [
+        "--enable_xai"
+      ],
+      "default": null,
+      "action": "store_true",
+      "help": "Enable all XAI features"
+    },
+    {
+      "flags": [
+        "--enable_attention"
+      ],
+      "default": null,
+      "action": "store_true",
+      "help": "Enable attention visualization"
+    },
+    {
+      "flags": [
+        "--enable_gradcam"
+      ],
+      "default": null,
+      "action": "store_true",
+      "help": "Enable Grad-CAM"
+    },
+    {
+      "flags": [
+        "--enable_frequency"
+      ],
+      "default": null,
+      "action": "store_true",
+      "help": "Enable frequency analysis"
+    },
+    {
+      "flags": [
+        "--max_samples"
+      ],
+      "default": "-1",
+      "action": null,
+      "help": null
+    }
+  ],
+  "xai_modules_initialized": [
+    "EnhancedFDCAAttentionVisualizer",
+    "EnhancedSegmentationGradCAM",
+    "EnhancedFrequencyComponentAnalyzer",
+    "EnhancedFrequencyDomainAnalyzer"
+  ],
+  "output_directories": [
+    "str(self.xai_dir / 'attention",
+    "str(self.xai_dir / 'gradcam",
+    "str(self.xai_dir / 'freq_analysis",
+    "str(self.xai_dir / 'freq_component",
+    "outputs/xai_<timestamp>/"
+  ],
+  "evaluate_batch_signature": "self, low_freq_input: torch.Tensor, high_freq_input: torch.Tensor,\n                      mask_gt: torch.Tensor, sample_id: str = 'sample'",
+  "main_loop_present": true
+}

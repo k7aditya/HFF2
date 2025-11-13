@@ -1,0 +1,78 @@
+Main purpose
+Run evaluation of HFF-Net on test volumes and produce XAI artifacts (attention maps, Grad-CAM, LF/HF frequency analysis), plus mechanistic interpretability outputs (feature importance), and save everything into a timestamped run directory.
+ eval_new
+
+
+Key components
+EnhancedHFFNetEvaluator — central class that:
+
+Creates a timestamped run directory ./outputs/xai_<timestamp>/ and subfolders (attention, gradcam, freq_component, freq_analysis).
+ eval_new
+
+
+Initializes XAI helpers:
+
+EnhancedFDCAAttentionVisualizer (attention extraction + mechanistic activations cache).
+ attention_vis
+
+
+EnhancedSegmentationGradCAM (3D Grad-CAM).
+ attention_vis
+
+
+EnhancedFrequencyComponentAnalyzer (LF/HF contribution generator + visualizer).
+ attention_vis
+
+
+EnhancedFrequencyDomainAnalyzer (frequency spectrum/band analysis).
+ freq_analysis
+
+
+evaluate_batch(...):
+
+
+Runs model forward pass → softmax → predicted segmentation.
+
+
+Optionally extracts attention maps (registers hooks), aggregates them, visualizes and saves attention figure; caches activations and computes compute_feature_importance(...) for mechanistic insights (prints per-layer top-5 features etc.).
+ eval_new
+
+ attention_vis
+
+
+Optionally generates Grad-CAM (multi-class) and saves visualizations.
+ eval_new
+
+
+Optionally runs LF-only and HF-only predictions + visualizes differences (LF/HF contributions and disagreement map).
+ attention_vis
+
+
+Returns a results dict containing predictions, booleans for which XAI outputs were generated, and saved mechanistic insights.
+ eval_new
+
+
+Main script (if __name__ == '__main__'):
+
+
+Argparse options for dataset, model checkpoint, selected modalities, XAI toggles (--enable_xai, --enable_attention, --enable_gradcam, --enable_frequency), batch size, output dir, --max_samples.
+ eval_new
+
+
+Loads model (HFFNet), loads test loader via get_loaders(...), instantiates EnhancedHFFNetEvaluator, iterates over validation loader and calls evaluate_batch for each sample, collects and prints summary at end.
+ eval_new
+
+
+XAI & mechanistic specifics
+Attention hooks collect activations into activations_cache inside EnhancedFDCAAttentionVisualizer. compute_feature_importance computes per-channel variance across spatial dims to rank features (high variance = selective feature). These importance scores are printed and stored in results.
+ attention_vis
+
+ eval_new
+
+
+Grad-CAM implementation registers forward/backward hooks and computes class-wise CAMs (supports 3D volumes).
+ attention_vis
+
+
+Frequency analysis supports extracting LF/HF with 3D FFT and provides visualization functions (spectra + band energies).
+ freq_analysis
