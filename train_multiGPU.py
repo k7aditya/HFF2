@@ -19,6 +19,7 @@ import random
 from tqdm import tqdm
 import wandb
 from datetime import datetime
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = "max_split_size_mb:128"
 
 # ===== NEW: DDP imports =====
 import torch.distributed as dist
@@ -131,14 +132,14 @@ def compute_fisher_information(model, dataloader, criterion):
         low_freq_inputs = []
         high_freq_inputs = []
         for j in range(20):
-            input_tensor = data[j].unsqueeze(dim=1).type(torch.cuda.FloatTensor)
+            input_tensor = data[j].unsqueeze(dim=1).type(device=device, dtype=torch.float)
             if j in [0, 1, 2, 3]:
                 low_freq_inputs.append(input_tensor)
             else:
                 high_freq_inputs.append(input_tensor)
         low_freq_inputs = torch.cat(low_freq_inputs, dim=1)
         high_freq_inputs = torch.cat(high_freq_inputs, dim=1)
-        target = mask_to_class_indices(data[20], label_mapping).long().cuda()
+        target = mask_to_class_indices(data[20], label_mapping).long().to(device)
         outputs_train_1, outputs_train_2,side1,side2= model(low_freq_inputs, high_freq_inputs)
         loss_train_sup1 = criterion(outputs_train_1, target)
         loss_train_sup2 = criterion(outputs_train_2, target)
@@ -387,7 +388,7 @@ if __name__ == '__main__':
                     low_freq_inputs = []
                     high_freq_inputs = []
                     for j in range(20):
-                        input_tensor = data[j].unsqueeze(1).type(torch.cuda.FloatTensor)
+                        input_tensor = data[j].unsqueeze(1).type(device=device, dtype=torch.float)
                         if j in [0,1,2,3]:
                             low_freq_inputs.append(input_tensor)
                         else:
@@ -433,7 +434,7 @@ if __name__ == '__main__':
             high_freq_inputs = []
 
             for j in range(20):
-                input_tensor = data[j].unsqueeze(dim=1).type(torch.cuda.FloatTensor)
+                input_tensor = data[j].unsqueeze(dim=1).type(device=device, dtype=torch.float)
                 if j in [0, 1, 2, 3]:
                     low_freq_inputs.append(input_tensor)
                 else:
@@ -508,7 +509,7 @@ if __name__ == '__main__':
                     high_freq_inputs = []
 
                     for j in range(20):
-                        input_tensor = data[j].unsqueeze(dim=1).type(torch.cuda.FloatTensor)
+                        input_tensor = data[j].unsqueeze(dim=1).type(device=device, dtype=torch.float)
                         if j in [0, 1, 2, 3]:
                             low_freq_inputs.append(input_tensor)
                         else:
