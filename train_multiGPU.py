@@ -157,16 +157,77 @@ def compute_fisher_information(model, dataloader, criterion):
 
     return fisher_information
 
-def important_weights_with_fisher(model, fisher_info,  std_multiplier=1):
-    with torch.no_grad():
-        for name, param in model.named_parameters():
-            if name == 'input_ed.conv.weight':
-                importance = fisher_info[name]
-                mean_importance = torch.mean(importance, dim=[2, 3, 4], keepdim=True)
-                std_importance = torch.std(importance, dim=[2, 3, 4], keepdim=True)
-                threshold = mean_importance + std_multiplier * std_importance
-                important_weights = importance > threshold
+import torch
+
+def important_weights_with_fisher(model, fisher_info, std_multiplier=1.0):
+    """
+    Compute an 'importance' tensor for each model parameter using its Fisher information.
+
+    Args:
+        model (torch.nn.Module): the model whose parameters we evaluate.
+        fisher_info (dict): mapping parameter-name -> fisher estimate tensor.
+                            Names may be prefixed with 'module.' (DDP/DataParallel).
+        std_multiplier (float): a scaling multiplier applied after sqrt(Fisher).
+
+    Returns:
+        dict: mapping parameter-name (matching model.named_parameters()) -> importance tensor
+              (same shape and device as the parameter).
+    """
+    important_weights = {}
+
+    # Defensive: if fisher_info is None or empty, return zeros for all params
+    if not fisher_info:
+        for pname, p in model.named_parameters():
+            important_weights[pname] = torch.zeros_like(p.data)
         return important_weights
+
+    # Helper to find fisher tensor for a param name, checking 'module.' variants
+    def find_fisher_for_name(name):
+        if name in fisher_info:
+            return fisher_info[name]
+        # try stripping or adding 'module.' prefix
+        if name.startswith("module.") and name[len("module."): ] in fisher_info:
+            return fisher_info[name[len("module."):]]
+        if ("module." + name) in fisher_info:
+            return fisher_info["module." + name]
+        return None
+
+    eps = 1e-12
+    for pname, p in model.named_parameters():
+        fi = find_fisher_for_name(pname)
+        if fi is None:
+            # missing fisher entry -> fallback to zeros
+            important_weights[pname] = torch.zeros_like(p.data)
+            continue
+
+        # move fisher to same device as parameter if needed, but avoid extra copies if already same device
+        try:
+            if fi.device != p.data.device:
+                fi = fi.to(p.data.device)
+        except Exception:
+            # fi might be a numpy array or unexpected type, attempt conversion
+            try:
+                fi = torch.as_tensor(fi, device=p.data.device)
+            except Exception:
+                important_weights[pname] = torch.zeros_like(p.data)
+                continue
+
+        # Ensure shape compatibility
+        if fi.shape == p.data.shape:
+            # importance := |param| * sqrt(Fisher) * std_multiplier  (you can change formula)
+            important = p.data.abs() * (fi + eps).sqrt() * float(std_multiplier)
+            important_weights[pname] = important.clone().detach()
+        else:
+            # Try to broadcast/reshape if possible
+            try:
+                fi_view = fi.view_as(p.data)
+                important = p.data.abs() * (fi_view + eps).sqrt() * float(std_multiplier)
+                important_weights[pname] = important.clone().detach()
+            except Exception:
+                # shape mismatch -> fallback to zeros to avoid crashes
+                important_weights[pname] = torch.zeros_like(p.data)
+
+    return important_weights
 
 if __name__ == '__main__':
     # ===== NEW: Parse local-rank for DDP =====
