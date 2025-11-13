@@ -1,0 +1,104 @@
+
+======================================================================
+HFF-NET ENHANCED EVALUATION WITH XAI
+======================================================================
+Log file: ./outputs/logs/eval_log_2025-11-13_13-00-28.txt
+Output directory: ./outputs
+
+[Loading] Model from /home/manish/BrainTumorHFF/HFF/saved_models/checkpoints/hff/brats20/all/hff-l=0.3-e=200-s=50-g=0.55-b=1-cw=15-w=3-100L-H-2025-11-13_02-00-01/best_Result2_et_0.6920_tc_0.7381_wt_0.8162.pth
+✓ Model loaded successfully
+✓ XAI modules initialized
+✓ Output directory: outputs
+
+[Loading] Data from /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+✓ Data loaded: 38 batches
+
+[Starting] Evaluation...
+======================================================================
+Evaluating:   0%|          | 0/38 [00:00<?, ?it/s]
+[1] Getting primary prediction...
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai/attention/sample_0000_attention.png
+[3] Generating Grad-CAM...
+Warning: Failed to generate CAM for class 0: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 1: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 2: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 3: element 0 of tensors does not require grad and does not have a grad_fn
+[4] Analyzing frequency components...
+✓ Saved: outputs/xai/freq_component/sample_0000_freq_comp.png
+✓ Evaluation complete for sample_0000
+Evaluating:   3%|2         | 1/38 [00:19<11:49, 19.18s/it]
+[1] Getting primary prediction...
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai/attention/sample_0001_attention.png
+[3] Generating Grad-CAM...
+Warning: Failed to generate CAM for class 0: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 1: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 2: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 3: element 0 of tensors does not require grad and does not have a grad_fn
+[4] Analyzing frequency components...
+✓ Saved: outputs/xai/freq_component/sample_0001_freq_comp.png
+✓ Evaluation complete for sample_0001
+Evaluating:   5%|5         | 2/38 [00:32<09:17, 15.50s/it]
+[1] Getting primary prediction...
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai/attention/sample_0002_attention.png
+[3] Generating Grad-CAM...
+Warning: Failed to generate CAM for class 0: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 1: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 2: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 3: element 0 of tensors does not require grad and does not have a grad_fn
+[4] Analyzing frequency components...
+✓ Saved: outputs/xai/freq_component/sample_0002_freq_comp.png
+✓ Evaluation complete for sample_0002
+Evaluating:   8%|7         | 3/38 [00:44<08:16, 14.17s/it]
+[1] Getting primary prediction...
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai/attention/sample_0003_attention.png
+[3] Generating Grad-CAM...
+Warning: Failed to generate CAM for class 0: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 1: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 2: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 3: element 0 of tensors does not require grad and does not have a grad_fn
+[4] Analyzing frequency components...
+✓ Saved: outputs/xai/freq_component/sample_0003_freq_comp.png
+✓ Evaluation complete for sample_0003
+Evaluating:  11%|#         | 4/38 [00:57<07:42, 13.60s/it]
+[1] Getting primary prediction...
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai/attention/sample_0004_attention.png
+[3] Generating Grad-CAM...
+Warning: Failed to generate CAM for class 0: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 1: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 2: element 0 of tensors does not require grad and does not have a grad_fn
+Warning: Failed to generate CAM for class 3: element 0 of tensors does not require grad and does not have a grad_fn
+[4] Analyzing frequency components...
+✓ Saved: outputs/xai/freq_component/sample_0004_freq_comp.png
+✓ Evaluation complete for sample_0004
+Evaluating:  13%|#3        | 5/38 [01:10<07:16, 13.23s/it]Evaluating:  13%|#3        | 5/38 [01:13<08:05, 14.70s/it]
+
+======================================================================
+EVALUATION COMPLETE
+======================================================================
+Samples evaluated: 5
+Output directory: ./outputs
+All results saved with 600 DPI resolution
+
+Generated outputs:
+  - Attention maps: True
+  - Grad-CAM visualizations: True
+  - Frequency analysis: True
