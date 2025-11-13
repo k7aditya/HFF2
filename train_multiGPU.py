@@ -167,6 +167,7 @@ def important_weights_with_fisher(model, fisher_info,  std_multiplier=1):
 
 if __name__ == '__main__':
     # ===== NEW: Parse local-rank for DDP =====
+    torch.cuda.empty_cache()
     parser = argparse.ArgumentParser()
     parser.add_argument('--local-rank', type=int, default=-1, dest='local_rank',
                        help='Local rank for distributed training')
