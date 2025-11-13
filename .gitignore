@@ -12,7 +12,6 @@ checkpoints/
 runs/
 wandb/
 data/
-outputs/
 *.nii
 *.nii.gz
 *.h5

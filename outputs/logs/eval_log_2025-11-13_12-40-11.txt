@@ -1,0 +1,9 @@
+
+======================================================================
+HFF-NET ENHANCED EVALUATION WITH XAI
+======================================================================
+Log file: ./outputs/logs/eval_log_2025-11-13_12-40-11.txt
+Output directory: ./outputs
+
+[Loading] Model from /home/manish/BrainTumorHFF/HFF/saved_models/checkpoints/hff/brats20/all/hff-l=0.3-e=200-s=50-g=0.55-b=1/best_Result2_et_0.6920_tc_0.7381_wt_0.8162.pth
+Error loading model: [Errno 2] No such file or directory: '/home/manish/BrainTumorHFF/HFF/saved_models/checkpoints/hff/brats20/all/hff-l=0.3-e=200-s=50-g=0.55-b=1/best_Result2_et_0.6920_tc_0.7381_wt_0.8162.pth'
