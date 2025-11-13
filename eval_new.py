@@ -246,6 +246,57 @@ class EnhancedHFFNetEvaluator:
                     )
                     
                     results['attention']['generated'] = True
+                    
+                    # ========== MECHANISTIC AI: PRINT FEATURE IMPORTANCE ==========
+                    # Get cached activations
+                    activations = self.attention_viz.activations_cache
+                    
+                    if activations:
+                        print(f"\n[MECHANISTIC INTERPRETABILITY ANALYSIS]")
+                        print(f"{'='*70}")
+                        print(f"Sample: {sample_id}")
+                        print(f"{'='*70}\n")
+                        
+                        # Compute importance
+                        importance = self.attention_viz.compute_feature_importance(activations)
+                        
+                        # Store for results
+                        results['mechanistic_insights'] = {}
+                        
+                        # Print for each layer
+                        for layer_name, importance_scores in importance.items():
+                            num_features = len(importance_scores)
+                            mean_imp = float(np.mean(importance_scores))
+                            max_imp = float(np.max(importance_scores))
+                            min_imp = float(np.min(importance_scores))
+                            
+                            # Get top 5 important features
+                            top_5_indices = np.argsort(importance_scores)[-5:][::-1]
+                            top_5_values = importance_scores[top_5_indices]
+                            
+                            # Print to console
+                            print(f"📊 Layer: {layer_name}")
+                            print(f"   ├─ Features: {num_features}")
+                            print(f"   ├─ Mean Importance: {mean_imp:.4f}")
+                            print(f"   ├─ Max Importance: {max_imp:.4f}")
+                            print(f"   ├─ Min Importance: {min_imp:.4f}")
+                            print(f"   └─ Top-5 Important Features (indices): {list(top_5_indices)}")
+                            print(f"      └─ Top-5 Values: {[f'{v:.4f}' for v in top_5_values]}\n")
+                            
+                            # Store in results
+                            results['mechanistic_insights'][layer_name] = {
+                                'num_features': int(num_features),
+                                'mean_importance': mean_imp,
+                                'max_importance': max_imp,
+                                'min_importance': min_imp,
+                                'top_5_indices': list(map(int, top_5_indices)),
+                                'top_5_values': list(map(float, top_5_values)),
+                                'all_importance_scores': importance_scores.tolist()
+                            }
+                        
+                        print(f"{'='*70}")
+                        print(f"✓ Mechanistic analysis complete\n")
+
             except Exception as e:
                 print(f"Warning: Attention generation failed: {e}")
                 results['attention']['generated'] = False
