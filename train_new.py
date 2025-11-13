@@ -9,6 +9,9 @@ import random
 from tqdm import tqdm
 import wandb
 from datetime import datetime
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:256'
+# Clear memory at startup
+torch.cuda.empty_cache()
 
 
 
@@ -454,7 +457,7 @@ if __name__ == '__main__':
 
 
             optimizer.step()
-
+            torch.cuda.empty_cache()
 
 
             train_loss_sup_1 += loss_train_sup1.item()
