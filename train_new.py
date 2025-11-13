@@ -155,6 +155,11 @@ def important_weights_with_fisher(model, fisher_info,  std_multiplier=1):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--resume_checkpoint', type=str, default=None,
+                    help='Path to checkpoint file to resume from')
+    parser.add_argument('--start_epoch', type=int, default=0,
+                    help='Epoch number to resume from')
+
     parser.add_argument('--train_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-train.txt')
     parser.add_argument('--val_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-val.txt')
     parser.add_argument('--path_trained_models', default='./result/checkpoints/hff')
@@ -282,6 +287,17 @@ if __name__ == '__main__':
     model = HFFNet(4,16, classnum)
     model = model.cuda()
     # model = DistributedDataParallel(model, device_ids=[args.local_rank])
+    if os.path.isfile(args.resume_checkpoint):
+        state = torch.load(args.resume_checkpoint, map_location='cpu')
+        # Handle both formats: raw state_dict or dict with key
+        if isinstance(state, dict) and 'model_state_dict' in state:
+            model.load_state_dict(state['model_state_dict'])
+        else:
+            model.load_state_dict(state)
+    else:
+        if args.resume_checkpoint:
+            print(f"[WARN] resume_checkpoint not found: {args.resume_checkpoint}")
+
 
     # Initialize DropoutScheduler with base dropout rate 0.5
     dropout_scheduler = DropoutScheduler(model, base_dropout=0.5)
@@ -305,7 +321,7 @@ if __name__ == '__main__':
     best_result = 'Result1'
     best_val_eval_list = [0 for i in range(1)]
 
-    for epoch in range(args.num_epochs):
+    for epoch in range(args.start_epoch, args.num_epochs):
 
         # Linearly decay dropout rate from 0.5 to 0.1 over training
         current_dropout = 0.5 - 0.4 * (epoch / args.num_epochs)
