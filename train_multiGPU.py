@@ -170,6 +170,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--local-rank', type=int, default=-1, dest='local_rank',
                        help='Local rank for distributed training')
+    parser.add_argument('--resume_checkpoint', type=str, default=None,
+                    help='Path to checkpoint file to resume from')
+    parser.add_argument('--start_epoch', type=int, default=0,
+                    help='Epoch number to resume from')
     # ===== END NEW =====
 
     parser.add_argument('--train_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-train.txt')
@@ -200,6 +204,8 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--network', default='hff', type=str)
 
     args = parser.parse_args()
+    
+ 
 
     # ===== NEW: Setup DDP =====
     is_ddp, rank, world_size, device = setup_ddp()
@@ -310,6 +316,20 @@ if __name__ == '__main__':
     model = HFFNet(4, 16, classnum)
     model = model.to(device)
     
+    # Optional: resume weights from a best model file (weights-only)
+    if os.path.isfile(args.resume_checkpoint):
+        state = torch.load(args.resume_checkpoint, map_location='cpu')
+        # Handle both formats: raw state_dict or dict with key
+        if isinstance(state, dict) and 'model_state_dict' in state:
+            model.load_state_dict(state['model_state_dict'])
+        else:
+            model.load_state_dict(state)
+        if is_main_process:
+            print(f"[RESUME] Loaded weights from: {args.resume_checkpoint}")
+    else:
+        if is_main_process and args.resume_checkpoint:
+            print(f"[WARN] resume_checkpoint not found: {args.resume_checkpoint}")
+
     # ===== NEW: Wrap with DDP if multi-GPU =====
     if is_ddp:
         model = DDP(model, device_ids=[int(str(device).split(':')[1])], find_unused_parameters=True)
@@ -334,7 +354,7 @@ if __name__ == '__main__':
     best_result = 'Result1'
     best_val_eval_list = [0 for i in range(1)]
 
-    for epoch in range(args.num_epochs):
+    for epoch in range(args.start_epoch, args.num_epochs):
         # ===== NEW: Set epoch for sampler =====
         if is_ddp:
             loaders['train'].sampler.set_epoch(epoch)
