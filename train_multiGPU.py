@@ -173,7 +173,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--local-rank', type=int, default=-1, dest='local_rank',
                        help='Local rank for distributed training')
-    parser.add_argument('--resume_checkpoint', type=str, default=None,
+    parser.add_argument('--resume_checkpoint', type=str, default='',
                     help='Path to checkpoint file to resume from')
     parser.add_argument('--start_epoch', type=int, default=0,
                     help='Epoch number to resume from')
@@ -320,18 +320,19 @@ if __name__ == '__main__':
     model = model.to(device)
     
     # Optional: resume weights from a best model file (weights-only)
-    if os.path.isfile(args.resume_checkpoint):
-        state = torch.load(args.resume_checkpoint, map_location='cpu')
-        # Handle both formats: raw state_dict or dict with key
-        if isinstance(state, dict) and 'model_state_dict' in state:
-            model.load_state_dict(state['model_state_dict'])
+    if args.resume_checkpoint:
+        if os.path.isfile(args.resume_checkpoint):
+            state = torch.load(args.resume_checkpoint, map_location='cpu')
+            # Handle both formats: raw state_dict or dict with key
+            if isinstance(state, dict) and 'model_state_dict' in state:
+                model.load_state_dict(state['model_state_dict'])
+            else:
+                model.load_state_dict(state)
+            if is_main_process:
+                print(f"[RESUME] Loaded weights from: {args.resume_checkpoint}")
         else:
-            model.load_state_dict(state)
-        if is_main_process:
-            print(f"[RESUME] Loaded weights from: {args.resume_checkpoint}")
-    else:
-        if is_main_process and args.resume_checkpoint:
-            print(f"[WARN] resume_checkpoint not found: {args.resume_checkpoint}")
+            if is_main_process and args.resume_checkpoint:
+                print(f"[WARN] resume_checkpoint not found: {args.resume_checkpoint}")
 
     # ===== NEW: Wrap with DDP if multi-GPU =====
     if is_ddp:
