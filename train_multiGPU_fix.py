@@ -21,6 +21,7 @@ import wandb
 from datetime import datetime
 
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = "max_split_size_mb:128"
+os.environ['CUDA_VISIBLE_DEVICES']='1,2,3'
 
 # ===== DDP imports =====
 import torch.distributed as dist
