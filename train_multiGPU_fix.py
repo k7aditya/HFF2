@@ -350,7 +350,7 @@ if __name__ == '__main__':
     best_result = 'Result1'
     best_val_eval_list = [0 for i in range(1)]
 
-    for epoch in range(args.num_epochs):
+    for epoch in range(args.start_epoch, args.num_epochs):
         if is_ddp:
             loaders['train'].sampler.set_epoch(epoch)
             loaders['val'].sampler.set_epoch(epoch)
