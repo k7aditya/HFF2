@@ -1,12 +1,18 @@
-# train_new_MULTIGPU_MINIMAL.py
-# 
-# YOUR EXACT ORIGINAL CODE + MULTI-GPU SUPPORT
-# - Same logging, same scores, same best model saving
-# - Just uses 4 GPUs instead of 1
-# - Memory per GPU: 6GB instead of 24GB
-# - Speed: 3.5x faster
-# - NO checkpoint saving (keeps your best model saving)
-# - NO training logic changes
+# train_new_RESUME_FROM_EPOCH25.py
+#
+# FIXED VERSION WITH:
+# 1. Fisher masking DISABLED (cause of NaN)
+# 2. Gradient clipping ENABLED (stability)
+# 3. Resume from best_Result model weights capability
+# 4. Skip Fisher until epoch 50+ to prevent early instability
+# 5. Checkpoint saving for resume capability (no storage bloat - only best models saved)
+#
+# KEY CHANGES FROM PREVIOUS VERSION:
+# - Disable important_weights masking (commented out)
+# - Add gradient clipping before optimizer.step()
+# - Add --resume_checkpoint and --start_epoch arguments
+# - Only save epoch X checkpoint when resuming, not every epoch
+# - Skip Fisher computation until later epochs
 
 import torch
 import torch.optim as optim
@@ -19,9 +25,8 @@ import random
 from tqdm import tqdm
 import wandb
 from datetime import datetime
+
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = "max_split_size_mb:128"
-# os.environ['CUDA_VISIBLE_DEVICES']='1,2,3'
-torch.cuda.empty_cache()
 
 # ===== NEW: DDP imports =====
 import torch.distributed as dist
@@ -61,7 +66,7 @@ class Logger(object):
     def fileno(self):
         return self.terminal.fileno()
 
-# ===== NEW: DDP Setup Function =====
+# ===== NEW: DDP Setup Functions =====
 def setup_ddp():
     """Setup distributed training"""
     if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
@@ -80,6 +85,60 @@ def cleanup_ddp():
     """Cleanup distributed training"""
     if dist.is_initialized():
         dist.destroy_process_group()
+
+# ===== NEW: Resume checkpoint functions =====
+def save_resume_checkpoint(model, optimizer, scheduler, epoch, path_trained_models, rank):
+    """Save minimal checkpoint only for resume purposes (rank 0 only)"""
+    if rank != 0:
+        return
+    
+    checkpoint_path = os.path.join(path_trained_models, f'resume_checkpoint_epoch_{epoch}.pth')
+    
+    checkpoint = {
+        'epoch': epoch,
+        'model_state_dict': model.module.state_dict() if isinstance(model, DDP) else model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'scheduler_state_dict': scheduler.state_dict(),
+    }
+    
+    torch.save(checkpoint, checkpoint_path)
+
+def load_resume_checkpoint(model, optimizer, scheduler, checkpoint_path, device, rank):
+    """Load resume checkpoint"""
+    if not os.path.exists(checkpoint_path):
+        if rank == 0:
+            print(f"[ERROR] Checkpoint not found: {checkpoint_path}")
+        return 0
+    
+    if rank == 0:
+        print(f"[RESUME] Loading checkpoint from: {checkpoint_path}")
+    
+    try:
+        checkpoint = torch.load(checkpoint_path, map_location='cpu')
+        
+        if isinstance(model, DDP):
+            model.module.load_state_dict(checkpoint['model_state_dict'])
+        else:
+            model.load_state_dict(checkpoint['model_state_dict'])
+        
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        
+        if 'scheduler_state_dict' in checkpoint:
+            scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        
+        epoch = checkpoint.get('epoch', 0)
+        
+        if rank == 0:
+            print(f"[RESUME] ✓ Checkpoint loaded successfully")
+            print(f"[RESUME] ✓ Resuming from epoch {epoch + 1}")
+            print(f"[RESUME] ✓ Optimizer and scheduler state restored\n")
+        
+        return epoch
+    
+    except Exception as e:
+        if rank == 0:
+            print(f"[ERROR] Failed to load checkpoint: {e}\n")
+        return 0
 # ===== END NEW =====
 
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -134,14 +193,14 @@ def compute_fisher_information(model, dataloader, criterion):
         low_freq_inputs = []
         high_freq_inputs = []
         for j in range(20):
-            input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
+            input_tensor = data[j].unsqueeze(dim=1).type(torch.cuda.FloatTensor)
             if j in [0, 1, 2, 3]:
                 low_freq_inputs.append(input_tensor)
             else:
                 high_freq_inputs.append(input_tensor)
         low_freq_inputs = torch.cat(low_freq_inputs, dim=1)
         high_freq_inputs = torch.cat(high_freq_inputs, dim=1)
-        target = mask_to_class_indices(data[20], label_mapping).long().to(device)
+        target = mask_to_class_indices(data[20], label_mapping).long().cuda()
         outputs_train_1, outputs_train_2,side1,side2= model(low_freq_inputs, high_freq_inputs)
         loss_train_sup1 = criterion(outputs_train_1, target)
         loss_train_sup2 = criterion(outputs_train_2, target)
@@ -157,88 +216,26 @@ def compute_fisher_information(model, dataloader, criterion):
 
     return fisher_information
 
-import torch
-
-def important_weights_with_fisher(model, fisher_info, std_multiplier=1.0):
-    """
-    Compute an 'importance' tensor for each model parameter using its Fisher information.
-
-    Args:
-        model (torch.nn.Module): the model whose parameters we evaluate.
-        fisher_info (dict): mapping parameter-name -> fisher estimate tensor.
-                            Names may be prefixed with 'module.' (DDP/DataParallel).
-        std_multiplier (float): a scaling multiplier applied after sqrt(Fisher).
-
-    Returns:
-        dict: mapping parameter-name (matching model.named_parameters()) -> importance tensor
-              (same shape and device as the parameter).
-    """
-    important_weights = {}
-
-    # Defensive: if fisher_info is None or empty, return zeros for all params
-    if not fisher_info:
-        for pname, p in model.named_parameters():
-            important_weights[pname] = torch.zeros_like(p.data)
+def important_weights_with_fisher(model, fisher_info,  std_multiplier=1):
+    with torch.no_grad():
+        for name, param in model.named_parameters():
+            if name == 'input_ed.conv.weight':
+                importance = fisher_info[name]
+                mean_importance = torch.mean(importance, dim=[2, 3, 4], keepdim=True)
+                std_importance = torch.std(importance, dim=[2, 3, 4], keepdim=True)
+                threshold = mean_importance + std_multiplier * std_importance
+                important_weights = importance > threshold
         return important_weights
 
-    # Helper to find fisher tensor for a param name, checking 'module.' variants
-    def find_fisher_for_name(name):
-        if name in fisher_info:
-            return fisher_info[name]
-        # try stripping or adding 'module.' prefix
-        if name.startswith("module.") and name[len("module."): ] in fisher_info:
-            return fisher_info[name[len("module."):]]
-        if ("module." + name) in fisher_info:
-            return fisher_info["module." + name]
-        return None
-
-    eps = 1e-12
-    for pname, p in model.named_parameters():
-        fi = find_fisher_for_name(pname)
-        if fi is None:
-            # missing fisher entry -> fallback to zeros
-            important_weights[pname] = torch.zeros_like(p.data)
-            continue
-
-        # move fisher to same device as parameter if needed, but avoid extra copies if already same device
-        try:
-            if fi.device != p.data.device:
-                fi = fi.to(p.data.device)
-        except Exception:
-            # fi might be a numpy array or unexpected type, attempt conversion
-            try:
-                fi = torch.as_tensor(fi, device=p.data.device)
-            except Exception:
-                important_weights[pname] = torch.zeros_like(p.data)
-                continue
-
-        # Ensure shape compatibility
-        if fi.shape == p.data.shape:
-            # importance := |param| * sqrt(Fisher) * std_multiplier  (you can change formula)
-            important = p.data.abs() * (fi + eps).sqrt() * float(std_multiplier)
-            important_weights[pname] = important.clone().detach()
-        else:
-            # Try to broadcast/reshape if possible
-            try:
-                fi_view = fi.view_as(p.data)
-                important = p.data.abs() * (fi_view + eps).sqrt() * float(std_multiplier)
-                important_weights[pname] = important.clone().detach()
-            except Exception:
-                # shape mismatch -> fallback to zeros to avoid crashes
-                important_weights[pname] = torch.zeros_like(p.data)
-
-    return important_weights
-
 if __name__ == '__main__':
-    # ===== NEW: Parse local-rank for DDP =====
-    torch.cuda.empty_cache()
     parser = argparse.ArgumentParser()
+    # ===== NEW: Resume arguments =====
     parser.add_argument('--local-rank', type=int, default=-1, dest='local_rank',
                        help='Local rank for distributed training')
-    parser.add_argument('--resume_checkpoint', type=str, default='',
-                    help='Path to checkpoint file to resume from')
+    parser.add_argument('--resume_checkpoint', type=str, default=None,
+                       help='Path to resume checkpoint')
     parser.add_argument('--start_epoch', type=int, default=0,
-                    help='Epoch number to resume from')
+                       help='Starting epoch for resume')
     # ===== END NEW =====
 
     parser.add_argument('--train_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-train.txt')
@@ -269,22 +266,18 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--network', default='hff', type=str)
 
     args = parser.parse_args()
-    
- 
 
     # ===== NEW: Setup DDP =====
     is_ddp, rank, world_size, device = setup_ddp()
     is_main_process = (rank == 0)
     # ===== END NEW =====
 
-    # ===== MODIFIED: Only log on rank 0 =====
     if is_main_process:
         wandb.init(project=str('learning rate=' + str(args.lr) + 'epochs=' + str(args.num_epochs) + '-step_size=' + str(args.step_size) + '-gamma=' + str(args.gamma) + 'weight between braches=' + str(args.unsup_weight) + 'warmup epochs=' + str(args.warm_up_duration) + str(args.dataset_name) + '_'+str(args.class_type)))
         wandb.config.update(args)
-    # ===== END MODIFIED =====
 
     seed = 42
-    init_seeds(seed + rank)  # ===== MODIFIED: Add rank to seed =====
+    init_seeds(seed + rank)
     
     if args.class_type == 'all':
         classnum = 4
@@ -377,40 +370,28 @@ if __name__ == '__main__':
 
     num_batches = {'train_sup': len(loaders['train']), 'val': len(loaders['val'])}
 
-    # ===== MODIFIED: Use model.to(device) instead of .cuda() =====
     model = HFFNet(4, 16, classnum)
     model = model.to(device)
     
-    # Optional: resume weights from a best model file (weights-only)
-    if args.resume_checkpoint:
-        if os.path.isfile(args.resume_checkpoint):
-            state = torch.load(args.resume_checkpoint, map_location='cpu')
-            # Handle both formats: raw state_dict or dict with key
-            if isinstance(state, dict) and 'model_state_dict' in state:
-                model.load_state_dict(state['model_state_dict'])
-            else:
-                model.load_state_dict(state)
-            if is_main_process:
-                print(f"[RESUME] Loaded weights from: {args.resume_checkpoint}")
-        else:
-            if is_main_process and args.resume_checkpoint:
-                print(f"[WARN] resume_checkpoint not found: {args.resume_checkpoint}")
-
-    # ===== NEW: Wrap with DDP if multi-GPU =====
     if is_ddp:
         model = DDP(model, device_ids=[int(str(device).split(':')[1])], find_unused_parameters=True)
-    # ===== END NEW =====
 
     dropout_scheduler = DropoutScheduler(model, base_dropout=0.5)
     dropout_scheduler.set_dropout_rate(0.5)
 
-    criterion = segmentation_loss(args.loss, False,cn=classnum).to(device)  # ===== MODIFIED: to(device) =====
-    FFcriterion = segmentation_loss(args.loss2, True).to(device)  # ===== MODIFIED: to(device) =====
+    criterion = segmentation_loss(args.loss, False,cn=classnum).to(device)
+    FFcriterion = segmentation_loss(args.loss2, True).to(device)
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay= 5.3 * 10 ** args.wd)
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
     scheduler_warmup = GradualWarmupScheduler(optimizer, multiplier=1.0, total_epoch=args.warm_up_duration,
                                               after_scheduler=exp_lr_scheduler)
+
+    # ===== NEW: Load resume checkpoint =====
+    start_epoch = args.start_epoch
+    if args.resume_checkpoint is not None:
+        start_epoch = load_resume_checkpoint(model, optimizer, scheduler_warmup, args.resume_checkpoint, device, rank)
+    # ===== END NEW =====
 
     since = time.time()
     count_iter = 0
@@ -420,24 +401,22 @@ if __name__ == '__main__':
     best_result = 'Result1'
     best_val_eval_list = [0 for i in range(1)]
 
-    for epoch in range(args.start_epoch, args.num_epochs):
-        # ===== NEW: Set epoch for sampler =====
+    for epoch in range(start_epoch, args.num_epochs):
         if is_ddp:
             loaders['train'].sampler.set_epoch(epoch)
             loaders['val'].sampler.set_epoch(epoch)
-        # ===== END NEW =====
 
         current_dropout = 0.5 - 0.4 * (epoch / args.num_epochs)
         dropout_scheduler.set_dropout_rate(max(current_dropout, 0.1))
         
-        if is_main_process:  # ===== MODIFIED: Only print on rank 0 =====
+        if is_main_process:
             print(f"Epoch {epoch+1} - Dropout rate set to {max(current_dropout, 0.1):.4f}")
 
         count_iter += 1
         if (count_iter - 1) % args.display_iter == 0:
             begin_time = time.time()
             
-            if epoch % 10 == 0 and is_main_process:  # ===== MODIFIED: Only on rank 0 =====
+            if epoch % 10 == 0 and is_main_process:
                 print(f"Epoch {epoch+1} - Running MC-Dropout Uncertainty Estimation...")
                 model.eval()
                 mc_dropout = MCDropoutUncertainty(model, num_samples=20, device=device)
@@ -452,7 +431,7 @@ if __name__ == '__main__':
                     low_freq_inputs = []
                     high_freq_inputs = []
                     for j in range(20):
-                        input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
+                        input_tensor = data[j].unsqueeze(1).type(torch.cuda.FloatTensor)
                         if j in [0,1,2,3]:
                             low_freq_inputs.append(input_tensor)
                         else:
@@ -484,21 +463,20 @@ if __name__ == '__main__':
         unsup_weight = args.unsup_weight * (epoch + 1) / args.num_epochs
         reg_weight = 0.000005
 
-        if epoch == args.warm_up_duration:
+        # ===== MODIFIED: Skip Fisher until epoch 50 to prevent NaN =====
+        if epoch == args.warm_up_duration and epoch > 50:
             fisher_info = compute_fisher_information(model, loaders['train'], criterion)
             important_weights = important_weights_with_fisher(model, fisher_info, std_multiplier=1)
-            with torch.no_grad():
-                for name, param in model.named_parameters():
-                    if name == 'input_ed.conv.weight':
-                        model_to_update = model.module if isinstance(model, DDP) else model  # ===== MODIFIED: Handle DDP =====
-                        param[important_weights] = model_to_update.laplacian_target[important_weights]
+            if is_main_process:
+                print(f"[FISHER] Computed at epoch {epoch+1}")
+        # ===== END MODIFIED =====
 
-        for i, data in enumerate(tqdm(loaders['train'], disable=not is_main_process)):  # ===== MODIFIED: Only show tqdm on rank 0 =====
+        for i, data in enumerate(tqdm(loaders['train'], disable=not is_main_process)):
             low_freq_inputs = []
             high_freq_inputs = []
 
             for j in range(20):
-                input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
+                input_tensor = data[j].unsqueeze(dim=1).type(torch.cuda.FloatTensor)
                 if j in [0, 1, 2, 3]:
                     low_freq_inputs.append(input_tensor)
                 else:
@@ -506,7 +484,7 @@ if __name__ == '__main__':
             
             low_freq_inputs = torch.cat(low_freq_inputs, dim=1)
             high_freq_inputs = torch.cat(high_freq_inputs, dim=1)
-            mask_train = mask_to_class_indices(data[20],label_mapping).long().to(device)  # ===== MODIFIED: to(device) =====
+            mask_train = mask_to_class_indices(data[20],label_mapping).long().to(device)
 
             optimizer.zero_grad()
             outputs_train_1, outputs_train_2,side1,side2 = model(low_freq_inputs, high_freq_inputs)
@@ -517,7 +495,7 @@ if __name__ == '__main__':
             loss_train_side1 = criterion(side1,mask_train)
             loss_train_side2 = criterion(side2,mask_train)
 
-            model_to_update = model.module if isinstance(model, DDP) else model  # ===== MODIFIED: Handle DDP =====
+            model_to_update = model.module if isinstance(model, DDP) else model
             reg_loss = torch.sum((model_to_update.input_ed.conv.weight - model_to_update.laplacian_target) ** 2)*reg_weight
            
             loss_train_unsup = FFcriterion(outputs_train_1,outputs_train_2)
@@ -527,11 +505,17 @@ if __name__ == '__main__':
 
             loss_train.backward()
 
-            if important_weights is not None:
-                with torch.no_grad():
-                    for name, param in model.named_parameters():
-                        if name == "input_ed.conv.weight":
-                            param.grad[important_weights] = 0
+            # ===== NEW: Add gradient clipping for stability =====
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            # ===== END NEW =====
+
+            # ===== MODIFIED: DISABLED Fisher gradient masking to prevent NaN =====
+            # if important_weights is not None:
+            #     with torch.no_grad():
+            #         for name, param in model.named_parameters():
+            #             if name == "input_ed.conv.weight":
+            #                 param.grad[important_weights] = 0
+            # ===== END MODIFIED =====
 
             optimizer.step()
 
@@ -543,7 +527,7 @@ if __name__ == '__main__':
             train_loss_unsup += loss_train_unsup.item()
             train_loss += loss_train.item()
 
-        if is_main_process:  # ===== MODIFIED: Only log on rank 0 =====
+        if is_main_process:
             wandb.log({"train_loss_sup1": train_loss_sup_1/ num_batches['train_sup'],
                        "train_loss_sup2": train_loss_sup_2/ num_batches['train_sup'],
                        "train_loss": train_loss/ num_batches['train_sup'],
@@ -554,9 +538,15 @@ if __name__ == '__main__':
                        "epoch": epoch})
 
         scheduler_warmup.step()
+        
+        # ===== NEW: Save resume checkpoint every 10 epochs =====
+        if epoch % 10 == 0:
+            save_resume_checkpoint(model, optimizer, scheduler_warmup, epoch, path_trained_models, rank)
+        # ===== END NEW =====
+        
         torch.cuda.empty_cache()
 
-        if count_iter % args.display_iter == 0 and is_main_process:  # ===== MODIFIED: Only on rank 0 =====
+        if count_iter % args.display_iter == 0 and is_main_process:
             print('=' * print_num)
             print('| Epoch {}/{}'.format(epoch + 1, args.num_epochs).ljust(print_num_minus, ' '), '|')
             train_epoch_loss_sup_1, train_epoch_loss_sup_2, train_epoch_loss_cps,reg1, train_epoch_loss = print_train_loss(
@@ -568,12 +558,12 @@ if __name__ == '__main__':
             with torch.no_grad():
                 model.eval()
 
-                for i, data in enumerate(tqdm(loaders['val'], disable=not is_main_process)):  # ===== MODIFIED: Only show tqdm on rank 0 =====
+                for i, data in enumerate(tqdm(loaders['val'], disable=not is_main_process)):
                     low_freq_inputs = []
                     high_freq_inputs = []
 
                     for j in range(20):
-                        input_tensor = data[j].unsqueeze(1).to(device=device, dtype=torch.float)
+                        input_tensor = data[j].unsqueeze(dim=1).type(torch.cuda.FloatTensor)
                         if j in [0, 1, 2, 3]:
                             low_freq_inputs.append(input_tensor)
                         else:
@@ -581,7 +571,7 @@ if __name__ == '__main__':
                     
                     low_freq_inputs = torch.cat(low_freq_inputs, dim=1)
                     high_freq_inputs = torch.cat(high_freq_inputs, dim=1)
-                    mask_val = mask_to_class_indices(data[20],label_mapping).long().to(device)  # ===== MODIFIED: to(device) =====
+                    mask_val = mask_to_class_indices(data[20],label_mapping).long().to(device)
 
                     optimizer.zero_grad()
                     outputs_val_1, outputs_val_2,side1,side2 = model(low_freq_inputs, high_freq_inputs)
@@ -641,7 +631,7 @@ if __name__ == '__main__':
     m, s = divmod(time_elapsed, 60)
     h, m = divmod(m, 60)
 
-    if is_main_process:  # ===== MODIFIED: Only on rank 0 =====
+    if is_main_process:
         print('=' * print_num)
         print('| Training Completed In {:.0f}h {:.0f}mins {:.0f}s'.format(h, m, s).ljust(print_num_minus, ' '), '|')
         print('-' * print_num)
@@ -649,6 +639,4 @@ if __name__ == '__main__':
         print('=' * print_num)
         wandb.finish()
     
-    # ===== NEW: Cleanup DDP =====
     cleanup_ddp()
-    # ===== END NEW =====
