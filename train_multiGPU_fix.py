@@ -210,6 +210,9 @@ if __name__ == '__main__':
                        help='Local rank for distributed training')
     parser.add_argument('--resume_checkpoint', type=str, default=None,
                        help='Path to resume checkpoint')
+    parser.add_argument('--start_epoch', type=int, default=0,
+                    help='Epoch number to resume from')
+
 
     parser.add_argument('--train_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-train.txt')
     parser.add_argument('--val_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-val.txt')
@@ -375,7 +378,7 @@ if __name__ == '__main__':
     best_result = 'Result1'
     best_val_eval_list = [0 for i in range(1)]
 
-    for epoch in range(args.num_epochs):
+    for epoch in range(args.start_epoch, args.num_epochs):
         if is_ddp:
             loaders['train'].sampler.set_epoch(epoch)
             loaders['val'].sampler.set_epoch(epoch)
