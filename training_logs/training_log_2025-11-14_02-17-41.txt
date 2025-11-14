@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/home/manish/BrainTumorHFF/HFF/train_multiGPU.py", line 215, in <module>
+    is_ddp, rank, world_size, device = setup_ddp()
+  File "/home/manish/BrainTumorHFF/HFF/train_multiGPU.py", line 72, in setup_ddp
+    torch.cuda.set_device(local_rank)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/cuda/__init__.py", line 350, in set_device
+    torch._C._cuda_setDevice(device)
+RuntimeError: CUDA error: invalid device ordinal
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-train.txt, which contains 295 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-val.txt, which contains 36 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
