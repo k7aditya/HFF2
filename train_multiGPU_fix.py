@@ -1,18 +1,11 @@
-# train_new_RESUME_FROM_EPOCH25.py
+# train_new_MULTIGPU_NAN_FIX.py
 #
-# FIXED VERSION WITH:
-# 1. Fisher masking DISABLED (cause of NaN)
-# 2. Gradient clipping ENABLED (stability)
-# 3. Resume from best_Result model weights capability
-# 4. Skip Fisher until epoch 50+ to prevent early instability
-# 5. Checkpoint saving for resume capability (no storage bloat - only best models saved)
-#
-# KEY CHANGES FROM PREVIOUS VERSION:
-# - Disable important_weights masking (commented out)
-# - Add gradient clipping before optimizer.step()
-# - Add --resume_checkpoint and --start_epoch arguments
-# - Only save epoch X checkpoint when resuming, not every epoch
-# - Skip Fisher computation until later epochs
+# YOUR EXACT ORIGINAL CODE + 4 GPU SUPPORT + NaN FIX
+# - SAME save/load logic as original (only best_Result models, no checkpoints)
+# - SAME training logs, scoring, evaluation
+# - Just DDP for multi-GPU
+# - Just fixes for NaN (Fisher disabled + gradient clipping)
+# - NO resume checkpoint logic changes
 
 import torch
 import torch.optim as optim
@@ -85,60 +78,6 @@ def cleanup_ddp():
     """Cleanup distributed training"""
     if dist.is_initialized():
         dist.destroy_process_group()
-
-# ===== NEW: Resume checkpoint functions =====
-def save_resume_checkpoint(model, optimizer, scheduler, epoch, path_trained_models, rank):
-    """Save minimal checkpoint only for resume purposes (rank 0 only)"""
-    if rank != 0:
-        return
-    
-    checkpoint_path = os.path.join(path_trained_models, f'resume_checkpoint_epoch_{epoch}.pth')
-    
-    checkpoint = {
-        'epoch': epoch,
-        'model_state_dict': model.module.state_dict() if isinstance(model, DDP) else model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'scheduler_state_dict': scheduler.state_dict(),
-    }
-    
-    torch.save(checkpoint, checkpoint_path)
-
-def load_resume_checkpoint(model, optimizer, scheduler, checkpoint_path, device, rank):
-    """Load resume checkpoint"""
-    if not os.path.exists(checkpoint_path):
-        if rank == 0:
-            print(f"[ERROR] Checkpoint not found: {checkpoint_path}")
-        return 0
-    
-    if rank == 0:
-        print(f"[RESUME] Loading checkpoint from: {checkpoint_path}")
-    
-    try:
-        checkpoint = torch.load(checkpoint_path, map_location='cpu')
-        
-        if isinstance(model, DDP):
-            model.module.load_state_dict(checkpoint['model_state_dict'])
-        else:
-            model.load_state_dict(checkpoint['model_state_dict'])
-        
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        
-        if 'scheduler_state_dict' in checkpoint:
-            scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-        
-        epoch = checkpoint.get('epoch', 0)
-        
-        if rank == 0:
-            print(f"[RESUME] ✓ Checkpoint loaded successfully")
-            print(f"[RESUME] ✓ Resuming from epoch {epoch + 1}")
-            print(f"[RESUME] ✓ Optimizer and scheduler state restored\n")
-        
-        return epoch
-    
-    except Exception as e:
-        if rank == 0:
-            print(f"[ERROR] Failed to load checkpoint: {e}\n")
-        return 0
 # ===== END NEW =====
 
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -229,13 +168,9 @@ def important_weights_with_fisher(model, fisher_info,  std_multiplier=1):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    # ===== NEW: Resume arguments =====
+    # ===== NEW: local-rank for DDP =====
     parser.add_argument('--local-rank', type=int, default=-1, dest='local_rank',
                        help='Local rank for distributed training')
-    parser.add_argument('--resume_checkpoint', type=str, default=None,
-                       help='Path to resume checkpoint')
-    parser.add_argument('--start_epoch', type=int, default=0,
-                       help='Starting epoch for resume')
     # ===== END NEW =====
 
     parser.add_argument('--train_list', type=str, default='/teamspace/studios/this_studio/HFF/brats20/2-train.txt')
@@ -387,12 +322,6 @@ if __name__ == '__main__':
     scheduler_warmup = GradualWarmupScheduler(optimizer, multiplier=1.0, total_epoch=args.warm_up_duration,
                                               after_scheduler=exp_lr_scheduler)
 
-    # ===== NEW: Load resume checkpoint =====
-    start_epoch = args.start_epoch
-    if args.resume_checkpoint is not None:
-        start_epoch = load_resume_checkpoint(model, optimizer, scheduler_warmup, args.resume_checkpoint, device, rank)
-    # ===== END NEW =====
-
     since = time.time()
     count_iter = 0
     important_weights = None
@@ -401,7 +330,7 @@ if __name__ == '__main__':
     best_result = 'Result1'
     best_val_eval_list = [0 for i in range(1)]
 
-    for epoch in range(start_epoch, args.num_epochs):
+    for epoch in range(args.num_epochs):
         if is_ddp:
             loaders['train'].sampler.set_epoch(epoch)
             loaders['val'].sampler.set_epoch(epoch)
@@ -463,12 +392,15 @@ if __name__ == '__main__':
         unsup_weight = args.unsup_weight * (epoch + 1) / args.num_epochs
         reg_weight = 0.000005
 
-        # ===== MODIFIED: Skip Fisher until epoch 50 to prevent NaN =====
-        if epoch == args.warm_up_duration and epoch > 50:
-            fisher_info = compute_fisher_information(model, loaders['train'], criterion)
-            important_weights = important_weights_with_fisher(model, fisher_info, std_multiplier=1)
-            if is_main_process:
-                print(f"[FISHER] Computed at epoch {epoch+1}")
+        # ===== MODIFIED: DISABLED Fisher gradient masking to prevent NaN =====
+        # if epoch == args.warm_up_duration:
+        #     fisher_info = compute_fisher_information(model, loaders['train'], criterion)
+        #     important_weights = important_weights_with_fisher(model, fisher_info, std_multiplier=1)
+        #     with torch.no_grad():
+        #         for name, param in model.named_parameters():
+        #             if name == 'input_ed.conv.weight':
+        #                 model_to_update = model.module if isinstance(model, DDP) else model
+        #                 param[important_weights] = model_to_update.laplacian_target[important_weights]
         # ===== END MODIFIED =====
 
         for i, data in enumerate(tqdm(loaders['train'], disable=not is_main_process)):
@@ -538,12 +470,6 @@ if __name__ == '__main__':
                        "epoch": epoch})
 
         scheduler_warmup.step()
-        
-        # ===== NEW: Save resume checkpoint every 10 epochs =====
-        if epoch % 10 == 0:
-            save_resume_checkpoint(model, optimizer, scheduler_warmup, epoch, path_trained_models, rank)
-        # ===== END NEW =====
-        
         torch.cuda.empty_cache()
 
         if count_iter % args.display_iter == 0 and is_main_process:
