@@ -1,0 +1,20 @@
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-train.txt, which contains 295 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-val.txt, which contains 36 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-train.txt, which contains 295 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-val.txt, which contains 36 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[LOAD] Loading from: /home/manish/BrainTumorHFF/HFF/result/checkpoints/hff/brats20/all/hff-l=0.3-e=200-s=50-g=0.55-b=1-cw=15-w=3-100L-H-2025-11-14_12-23-36/best_Result2_et_0.8317_tc_0.9095_wt_0.8975.pth
+[LOAD] ✓ Checkpoint loaded successfully
+[LOAD] Loading from: /home/manish/BrainTumorHFF/HFF/result/checkpoints/hff/brats20/all/hff-l=0.3-e=200-s=50-g=0.55-b=1-cw=15-w=3-100L-H-2025-11-14_12-23-36/best_Result2_et_0.8317_tc_0.9095_wt_0.8975.pth
+[LOAD] ✓ Checkpoint loaded successfully
+Set dropout rate to 0.5000 (18 layers)
+Set dropout rate to 0.5000 (18 layers)
+Set dropout rate to 0.2000 (18 layers)
+Set dropout rate to 0.2000 (18 layers)
+Set dropout rate to 0.2000 (18 layers)
+Set dropout rate to 0.2000 (18 layers)
+Set dropout rate to 0.2000 (18 layers)
+Set dropout rate to 0.2000 (18 layers)
