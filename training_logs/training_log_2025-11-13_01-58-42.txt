@@ -1,27 +1,0 @@
-[34m[1mwandb[0m: Currently logged in as: [33mk7aditya[0m ([33mk7aditya-iiita-alumni-affairs[0m) to [32mhttps://api.wandb.ai[0m. Use [1m`wandb login --relogin`[0m to force relogin
-[34m[1mwandb[0m: setting up run 4tl93g2l (0.0s)
-[Am[2K[34m[1mwandb[0m: setting up run 4tl93g2l (0.0s)
-[Am[2K[34m[1mwandb[0m: setting up run 4tl93g2l (0.0s)
-[Am[2K[34m[1mwandb[0m: setting up run 4tl93g2l (0.0s)
-[Am[2K[34m[1mwandb[0m: setting up run 4tl93g2l (0.0s)
-[Am[2K[34m[1mwandb[0m: Tracking run with wandb version 0.22.3
-[34m[1mwandb[0m: Run data is saved locally in [35m[1m/home/manish/BrainTumorHFF/HFF/wandb/run-20251113_015842-4tl93g2l[0m
-[34m[1mwandb[0m: Run [1m`wandb offline`[0m to turn off syncing.
-[34m[1mwandb[0m: Syncing run [33mquiet-moon-13[0m
-[34m[1mwandb[0m:  View project at [34m[4mhttps://wandb.ai/k7aditya-iiita-alumni-affairs/learning%20rate%3D0.3epochs%3D200-step_size%3D50-gamma%3D0.55weight%20between%20braches%3D15warmup%20epochs%3D3brats20_all[0m
-[34m[1mwandb[0m:  View run at [34m[4mhttps://wandb.ai/k7aditya-iiita-alumni-affairs/learning%20rate%3D0.3epochs%3D200-step_size%3D50-gamma%3D0.55weight%20between%20braches%3D15warmup%20epochs%3D3brats20_all/runs/4tl93g2l[0m
-[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-train.txt, which contains 295 paired volume
-modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
-[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-val.txt, which contains 36 paired volume
-modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
-Set dropout rate to 0.5000 (18 layers)
-Set dropout rate to 0.5000 (18 layers)
-Epoch 1 - Dropout rate set to 0.5000
-Epoch 1 - Running MC-Dropout Uncertainty Estimation...
-Found 18 dropout layers for MC sampling
-Traceback (most recent call last):
-  File "/home/manish/BrainTumorHFF/HFF/train_new.py", line 347, in <module>
-    mc_outputs = mc_dropout.mc_forward_pass(low_freq_inputs, high_freq_inputs)
-  File "/home/manish/BrainTumorHFF/HFF/explainability/mc_dropout_fixed.py", line 127, in mc_forward_pass
-    outputs.append(output.cpu())
-AttributeError: 'tuple' object has no attribute 'cpu'
