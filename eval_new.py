@@ -297,33 +297,150 @@ class EnhancedHFFNetEvaluator:
         if self.args and getattr(self.args, 'enable_gradcam', True):
             print(f"[3] Generating Grad-CAM...")
             try:
-                low_grad = low_freq_input.detach().clone().requires_grad_(True)
-                high_grad = high_freq_input.detach().clone().requires_grad_(True)
-                full_grad = torch.cat([low_grad, high_grad], dim=1)
+                # ============================================================
+                # Step 1: Setup
+                # ============================================================
                 self.model.eval()
-                cams = self.gradcam.generate_multi_class_cam(
-                    full_grad, num_classes=num_classes, lf_channels=low_freq_input.shape[1]
-                )
+                
+                # Move inputs to device
+                low_input = low_freq_input.to(self.device)
+                high_input = high_freq_input.to(self.device)
+                
+                # IMPORTANT: Set requires_grad BEFORE forward pass
+                # This is different from detach().clone().requires_grad_()
+                low_input.requires_grad = True
+                high_input.requires_grad = True
+                
+                # ============================================================
+                # Step 2: Forward pass with gradient tracking
+                # ============================================================
+                self.model.zero_grad()
+                
+                # Get model output (with gradient tracking enabled)
+                output = self.model(low_input, high_input)
+                output_main = output[0] if isinstance(output, tuple) else output
+                
+                # ============================================================
+                # Step 3: Compute Grad-CAM for each class
+                # ============================================================
+                cams = {}
+                num_classes = output_main.shape[1]
+                
+                for class_id in range(num_classes):
+                    try:
+                        # Clear previous gradients
+                        self.model.zero_grad()
+                        if low_input.grad is not None:
+                            low_input.grad.zero_()
+                        if high_input.grad is not None:
+                            high_input.grad.zero_()
+                        
+                        # Get class-specific output
+                        class_score = output_main[:, class_id]
+                        
+                        # Sum over spatial dimensions to get single scalar
+                        # This is the target for backward pass
+                        class_loss = class_score.sum()
+                        
+                        # Backward pass - compute gradients
+                        class_loss.backward(retain_graph=True)
+                        
+                        # ====================================================
+                        # Step 4: Extract CAM from input gradients
+                        # ====================================================
+                        # For 3D medical imaging, we use input gradients
+                        # as the class activation map
+                        
+                        if low_input.grad is not None:
+                            # Get gradient of low freq input (first batch, first channel)
+                            grad_low = low_input.grad[0, 0].cpu().numpy()
+                            
+                            # Normalize gradient to [0, 1]
+                            grad_min = np.min(grad_low)
+                            grad_max = np.max(grad_low)
+                            
+                            if grad_max - grad_min > 1e-8:
+                                grad_low_norm = (grad_low - grad_min) / (grad_max - grad_min)
+                            else:
+                                grad_low_norm = np.zeros_like(grad_low)
+                            
+                            # ================================================
+                            # Step 5: 3D to 2D conversion
+                            # ================================================
+                            # For visualization, convert 3D (D, H, W) to 2D (H, W)
+                            # Use middle depth slice as representative view
+                            
+                            middle_depth = grad_low_norm.shape[0] // 2
+                            cam_2d = grad_low_norm[middle_depth, :, :]
+                            
+                            # Store CAM
+                            cams[class_id] = cam_2d
+                            print(f"✓ Successfully generated CAM for class {class_id}")
+                        
+                        else:
+                            cams[class_id] = None
+                            print(f"⚠ No gradients computed for class {class_id}")
+                    
+                    except Exception as e:
+                        print(f"⚠ Warning: CAM generation failed for class {class_id}: {e}")
+                        cams[class_id] = None
+                
+                # ============================================================
+                # Step 6: Visualize the best class (class 1 for tumor)
+                # ============================================================
                 cam_generated = any(cam is not None for cam in cams.values())
-                for cid, cam in cams.items():
-                    if cam is not None:
-                        print(f"✓ Successfully generated CAM for class {cid}")
+                
                 if 1 in cams and cams[1] is not None:
-                    input_img = low_freq_input[0, 0].cpu().numpy()
-                    seg_mask = mask_gt[0].cpu().numpy()
+                    # Get middle slice of input image and mask for 2D visualization
+                    middle_depth = low_freq_input.shape[2] // 2
+                    input_img_2d = low_freq_input[0, 0, middle_depth].cpu().numpy()
+                    seg_mask_2d = mask_gt[0, middle_depth].cpu().numpy()
+                    
+                    # Output path
                     out_path = self.xai_dir / 'gradcam' / f'{sample_id}_gradcam.png'
-                    self.gradcam.visualize_gradcam_enhanced(
-                        input_img=input_img, cam=cams[1], seg_mask=seg_mask, output_path=out_path, dpi=600
-                    )
-                    results['gradcam']['generated'] = True
-                    print(f"✓ Saved Grad-CAM to {out_path}")
+                    
+                    try:
+                        # Visualize CAM overlay on input image
+                        self.gradcam.visualize_gradcam_enhanced(
+                            input_img=input_img_2d,
+                            cam=cams[1],
+                            seg_mask=seg_mask_2d,
+                            output_path=out_path,
+                            dpi=600
+                        )
+                        results['gradcam']['generated'] = True
+                        print(f"✓ Saved Grad-CAM to {out_path}")
+                    
+                    except Exception as viz_error:
+                        print(f"⚠ Visualization step failed: {viz_error}")
+                        results['gradcam']['generated'] = False
+                
                 else:
-                    print("⚠ No CAM generated for class 1 visualization")
+                    print("⚠ No CAM generated for class 1")
                     results['gradcam']['generated'] = cam_generated
+            
             except Exception as e:
                 print(f"❌ Warning: Grad-CAM generation failed: {e}")
+                import traceback
+                traceback.print_exc()
                 results['gradcam']['generated'] = False
-
+            
+            finally:
+                # ============================================================
+                # Step 7: Cleanup - Important for next iterations
+                # ============================================================
+                self.model.zero_grad()
+                if low_input.grad is not None:
+                    low_input.grad.zero_()
+                if high_input.grad is not None:
+                    high_input.grad.zero_()
+                
+                # Detach inputs to prevent gradient accumulation
+                if hasattr(low_input, 'detach_'):
+                    low_input = low_input.detach()
+                if hasattr(high_input, 'detach_'):
+                    high_input = high_input.detach()
+                    
         # 5) Frequency component analysis (unchanged)
         if self.args and getattr(self.args, 'enable_frequency', True):
             print(f"[4] Analyzing frequency components...")
