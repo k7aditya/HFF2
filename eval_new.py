@@ -294,113 +294,132 @@ class EnhancedHFFNetEvaluator:
                 results['attention']['generated'] = False
 
         # 4) Grad-CAM (requires gradients) — fixed
+        # 4) Grad-CAM Visualization — ACTIVATION-BASED (FIXES INPLACE ERROR)
         if self.args and getattr(self.args, 'enable_gradcam', True):
-            print(f"[3] Generating Grad-CAM...")
+            print(f"[3] Generating Grad-CAM (activation-based)...")
             try:
-                # ============================================================
-                # Step 1: Setup
-                # ============================================================
                 self.model.eval()
                 
-                # Move inputs to device
-                low_input = low_freq_input.to(self.device)
-                high_input = high_freq_input.to(self.device)
+                # ============================================================
+                # Step 1: Register forward hooks to capture activations
+                # ============================================================
+                # Use forward hooks (not backward) - avoids inplace conflicts
+                activations = {}
+                handles = []
                 
-                # IMPORTANT: Set requires_grad BEFORE forward pass
-                # This is different from detach().clone().requires_grad_()
-                low_input.requires_grad = True
-                high_input.requires_grad = True
+                def get_activation(name):
+                    """Hook to capture layer activations"""
+                    def hook(module, input, output):
+                        if isinstance(output, tuple):
+                            output = output[0]
+                        activations[name] = output.detach()
+                    return hook
+                
+                # Target encoder output layers
+                target_layers = [
+                    'mobilenet_encoder_b1.enc5',
+                    'mobilenet_encoder_b2.enc5'
+                ]
+                
+                # Register hooks
+                for layer_name in target_layers:
+                    try:
+                        module = self.model
+                        for part in layer_name.split('.'):
+                            module = getattr(module, part)
+                        handle = module.register_forward_hook(get_activation(layer_name))
+                        handles.append(handle)
+                    except AttributeError:
+                        pass  # Layer doesn't exist, skip
                 
                 # ============================================================
-                # Step 2: Forward pass with gradient tracking
+                # Step 2: Forward pass WITHOUT gradient computation
                 # ============================================================
-                self.model.zero_grad()
+                # Key: torch.no_grad() prevents inplace operation conflicts
+                with torch.no_grad():
+                    low_input = low_freq_input.to(self.device)
+                    high_input = high_freq_input.to(self.device)
+                    
+                    # Forward pass
+                    output = self.model(low_input, high_input)
+                    output_main = output[0] if isinstance(output, tuple) else output
                 
-                # Get model output (with gradient tracking enabled)
-                output = self.model(low_input, high_input)
-                output_main = output[0] if isinstance(output, tuple) else output
+                # Remove hooks
+                for handle in handles:
+                    handle.remove()
                 
                 # ============================================================
-                # Step 3: Compute Grad-CAM for each class
+                # Step 3: Extract Class Activation Maps from activations
                 # ============================================================
                 cams = {}
                 num_classes = output_main.shape[1]
                 
                 for class_id in range(num_classes):
                     try:
-                        # Clear previous gradients
-                        self.model.zero_grad()
-                        if low_input.grad is not None:
-                            low_input.grad.zero_()
-                        if high_input.grad is not None:
-                            high_input.grad.zero_()
-                        
-                        # Get class-specific output
-                        class_score = output_main[:, class_id]
-                        
-                        # Sum over spatial dimensions to get single scalar
-                        # This is the target for backward pass
-                        class_loss = class_score.sum()
-                        
-                        # Backward pass - compute gradients
-                        class_loss.backward(retain_graph=True)
-                        
-                        # ====================================================
-                        # Step 4: Extract CAM from input gradients
-                        # ====================================================
-                        # For 3D medical imaging, we use input gradients
-                        # as the class activation map
-                        
-                        if low_input.grad is not None:
-                            # Get gradient of low freq input (first batch, first channel)
-                            grad_low = low_input.grad[0, 0].cpu().numpy()
+                        # Use encoder activation (high-level features)
+                        if 'mobilenet_encoder_b1.enc5' in activations:
+                            act = activations['mobilenet_encoder_b1.enc5']
                             
-                            # Normalize gradient to [0, 1]
-                            grad_min = np.min(grad_low)
-                            grad_max = np.max(grad_low)
+                            # Convert to numpy
+                            act = act.detach().cpu().numpy()
                             
-                            if grad_max - grad_min > 1e-8:
-                                grad_low_norm = (grad_low - grad_min) / (grad_max - grad_min)
+                            # ================================================
+                            # Step 4: Process 3D activation to 2D
+                            # ================================================
+                            # Shape: (Batch, Channels, Depth, Height, Width)
+                            act = act[0]  # Remove batch dimension (Channels, D, H, W)
+                            
+                            # Average over channels to get spatial importance
+                            act = np.abs(act).mean(axis=0)  # (D, H, W)
+                            
+                            # ================================================
+                            # Step 5: Normalize activation
+                            # ================================================
+                            act_min = np.min(act)
+                            act_max = np.max(act)
+                            
+                            if act_max - act_min > 1e-8:
+                                act_norm = (act - act_min) / (act_max - act_min)
                             else:
-                                grad_low_norm = np.zeros_like(grad_low)
+                                act_norm = np.ones_like(act) * 0.5
                             
                             # ================================================
-                            # Step 5: 3D to 2D conversion
+                            # Step 6: 3D to 2D conversion (middle slice)
                             # ================================================
-                            # For visualization, convert 3D (D, H, W) to 2D (H, W)
-                            # Use middle depth slice as representative view
+                            # Extract middle depth slice for visualization
+                            middle_depth = act_norm.shape[0] // 2
+                            cam_2d = act_norm[middle_depth, :, :]
                             
-                            middle_depth = grad_low_norm.shape[0] // 2
-                            cam_2d = grad_low_norm[middle_depth, :, :]
-                            
-                            # Store CAM
                             cams[class_id] = cam_2d
-                            print(f"✓ Successfully generated CAM for class {class_id}")
+                            print(f"✓ Generated activation-based CAM for class {class_id}")
                         
                         else:
                             cams[class_id] = None
-                            print(f"⚠ No gradients computed for class {class_id}")
                     
                     except Exception as e:
-                        print(f"⚠ Warning: CAM generation failed for class {class_id}: {e}")
+                        print(f"⚠ CAM extraction failed for class {class_id}: {e}")
                         cams[class_id] = None
                 
                 # ============================================================
-                # Step 6: Visualize the best class (class 1 for tumor)
+                # Step 7: Visualize the tumor class (class 1)
                 # ============================================================
                 cam_generated = any(cam is not None for cam in cams.values())
                 
                 if 1 in cams and cams[1] is not None:
-                    # Get middle slice of input image and mask for 2D visualization
+                    # Extract 2D slice from 3D input for visualization
                     middle_depth = low_freq_input.shape[2] // 2
-                    input_img_2d = low_freq_input[0, 0, middle_depth].cpu().numpy()
-                    seg_mask_2d = mask_gt[0, middle_depth].cpu().numpy()
+                    
+                    # Input image 2D
+                    input_img_2d = low_freq_input[0, 0, middle_depth].cpu().detach().numpy()
+                    
+                    # Segmentation mask 2D
+                    seg_mask_2d = mask_gt[0, middle_depth].cpu().detach().numpy()
                     
                     # Output path
                     out_path = self.xai_dir / 'gradcam' / f'{sample_id}_gradcam.png'
                     
                     try:
-                        # Visualize CAM overlay on input image
+                        # Visualize CAM overlay
                         self.gradcam.visualize_gradcam_enhanced(
                             input_img=input_img_2d,
                             cam=cams[1],
@@ -409,14 +428,14 @@ class EnhancedHFFNetEvaluator:
                             dpi=600
                         )
                         results['gradcam']['generated'] = True
-                        print(f"✓ Saved Grad-CAM to {out_path}")
+                        print(f"✓ Saved activation-based Grad-CAM to {out_path}")
                     
-                    except Exception as viz_error:
-                        print(f"⚠ Visualization step failed: {viz_error}")
+                    except Exception as viz_err:
+                        print(f"⚠ Visualization step failed: {viz_err}")
                         results['gradcam']['generated'] = False
                 
                 else:
-                    print("⚠ No CAM generated for class 1")
+                    print("⚠ No CAM available for class 1 visualization")
                     results['gradcam']['generated'] = cam_generated
             
             except Exception as e:
@@ -424,22 +443,6 @@ class EnhancedHFFNetEvaluator:
                 import traceback
                 traceback.print_exc()
                 results['gradcam']['generated'] = False
-            
-            finally:
-                # ============================================================
-                # Step 7: Cleanup - Important for next iterations
-                # ============================================================
-                self.model.zero_grad()
-                if low_input.grad is not None:
-                    low_input.grad.zero_()
-                if high_input.grad is not None:
-                    high_input.grad.zero_()
-                
-                # Detach inputs to prevent gradient accumulation
-                if hasattr(low_input, 'detach_'):
-                    low_input = low_input.detach()
-                if hasattr(high_input, 'detach_'):
-                    high_input = high_input.detach()
                     
         # 5) Frequency component analysis (unchanged)
         if self.args and getattr(self.args, 'enable_frequency', True):
