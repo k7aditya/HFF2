@@ -1,4 +1,4 @@
-# eval_new_FIXED.py
+# eval_new.py
 # COMPLETE FILE — robust loading + fixed Grad-CAM + normalized mechanistic importance
 # Preserves original saving/printing behavior
 
@@ -444,7 +444,7 @@ class EnhancedHFFNetEvaluator:
                 traceback.print_exc()
                 results['gradcam']['generated'] = False
                     
-        # 5) Frequency component analysis (unchanged)
+        # 5) Frequency component analysis (unchanged + FFT-based analysis call)
         if self.args and getattr(self.args, 'enable_frequency', True):
             print(f"[4] Analyzing frequency components...")
             try:
@@ -468,6 +468,47 @@ class EnhancedHFFNetEvaluator:
                     dpi=600
                 )
                 results['frequency']['lf_hf_analysis'] = True
+
+                # ------------------ NEW: call FFT-based analyzer from freq_analysis.py ------------------
+                try:
+                    # Convert low-frequency input (3D) to numpy (assume shape: B, C, D, H, W)
+                    # We pick the first batch and first LF channel (typical shape used in file)
+                    vol_np = low_freq_input[0, 0].cpu().numpy()
+                    
+                    # Use the analyzer to extract LF/HF spatial components (3D-aware)
+                    lf_spatial, hf_spatial = self.freq_analyzer.extract_frequency_components_3d(vol_np)
+                    
+                    # Compute spectra (will pick middle slice internally if needed)
+                    lf_spec = self.freq_analyzer.compute_frequency_spectrum(lf_spatial)
+                    hf_spec = self.freq_analyzer.compute_frequency_spectrum(hf_spatial)
+                    
+                    # Compute simple summary band energies (means of the spectrum magnitude)
+                    # Use log-spectra mean as a stable energy proxy
+                    lf_energy = float(np.mean(lf_spec))
+                    hf_energy = float(np.mean(hf_spec))
+                    total = lf_energy + hf_energy if (lf_energy + hf_energy) > 0 else 1.0
+                    band_energies = {
+                        "low_freq": lf_energy / total,
+                        "high_freq": hf_energy / total
+                    }
+                    
+                    # Output path for FFT analysis figure
+                    fft_out = self.xai_dir / 'freq_analysis' / f'{sample_id}_freq_analysis.png'
+                    
+                    # Visualize and save
+                    self.freq_analyzer.visualize_frequency_analysis_enhanced(
+                        image=vol_np,
+                        lf_spectrum=lf_spec,
+                        hf_spectrum=hf_spec,
+                        band_energies=band_energies,
+                        output_path=fft_out
+                    )
+                    results['frequency']['fft_analysis'] = True
+                    print(f"✓ Saved FFT-based frequency analysis to {fft_out}")
+                except Exception as inner_e:
+                    print(f"Warning: FFT-based frequency analyzer failed: {inner_e}")
+                    results['frequency']['fft_analysis'] = False
+
             except Exception as e:
                 print(f"Warning: Frequency analysis failed: {e}")
                 results['frequency']['lf_hf_analysis'] = False
