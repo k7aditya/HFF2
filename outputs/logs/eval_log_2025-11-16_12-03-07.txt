@@ -1,0 +1,1846 @@
+
+======================================================================
+HFF-NET ENHANCED EVALUATION WITH XAI + METRICS
+======================================================================
+Log file: ./outputs/logs/eval_log_2025-11-16_12-03-07.txt
+Output directory: ./outputs
+
+[Loading] Model from /home/manish/BrainTumorHFF/HFF/result/checkpoints/hff/brats20/all/hff-l=0.3-e=200-s=50-g=0.55-b=1-cw=15-w=3-100L-H-2025-11-14_12-23-36/best_Result2_et_0.8320_tc_0.9098_wt_0.8970.pth
+[LOAD] Loading checkpoint: /home/manish/BrainTumorHFF/HFF/result/checkpoints/hff/brats20/all/hff-l=0.3-e=200-s=50-g=0.55-b=1-cw=15-w=3-100L-H-2025-11-14_12-23-36/best_Result2_et_0.8320_tc_0.9098_wt_0.8970.pth
+✓ Checkpoint loaded and model moved to device
+✓ Model loaded successfully
+✓ XAI modules initialized
+✓ Run output directory: outputs/xai_2025-11-16_12-03-09
+
+[Loading] Data from /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+✓ Data loaded: 38 batches
+
+[Starting] Evaluation (XAI + per-sample metrics)...
+======================================================================
+Evaluating:   0%|          | 0/38 [00:00<?, ?it/s]
+[1] Getting primary prediction...
+
+[METRICS FOR sample_0000]
+==================================================
+class_0: Dice=0.9962, IoU=0.9924
+class_1: Dice=0.7369, IoU=0.5834
+class_2: Dice=0.7294, IoU=0.5741
+class_3: Dice=0.8159, IoU=0.6891
+==================================================
+
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai_2025-11-16_12-03-09/attention/sample_0000_attention.png
+
+[MECHANISTIC INTERPRETABILITY ANALYSIS]
+======================================================================
+Sample: sample_0000
+======================================================================
+
+Layer: LF_l4_FDCA.semantic_att.linear.0
+  Features: 8
+  Mean Importance: 0.2167
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 1, 6, 4]
+  Top-5 Values: ['1.0000', '0.5815', '0.0852', '0.0637', '0.0024']
+
+Layer: LF_l4_FDCA.semantic_att.linear.1
+  Features: 8
+  Mean Importance: 0.1980
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 2, 5, 6]
+  Top-5 Values: ['1.0000', '0.5819', '0.0013', '0.0009', '0.0000']
+
+Layer: LF_l4_FDCA.semantic_att.linear.2
+  Features: 128
+  Mean Importance: 0.2626
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [118, 58, 126, 36, 92]
+  Top-5 Values: ['1.0000', '0.7852', '0.7453', '0.7446', '0.6634']
+
+Layer: LF_l4_FDCA.semantic_att.linear
+  Features: 128
+  Mean Importance: 0.2626
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [118, 58, 126, 36, 92]
+  Top-5 Values: ['1.0000', '0.7852', '0.7453', '0.7446', '0.6634']
+
+Layer: LF_l4_FDCA.semantic_att
+  Features: 16
+  Mean Importance: 0.1581
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 2, 14]
+  Top-5 Values: ['1.0000', '0.3503', '0.3503', '0.2074', '0.2074']
+
+Layer: LF_l4_FDCA.positional_att.conv
+  Features: 16
+  Mean Importance: 0.1026
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 15, 2, 14]
+  Top-5 Values: ['1.0000', '0.4608', '0.0816', '0.0402', '0.0391']
+
+Layer: LF_l4_FDCA.positional_att
+  Features: 16
+  Mean Importance: 0.0683
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.0417', '0.0221', '0.0152', '0.0042']
+
+Layer: LF_l4_FDCA.slice_att.linear.0
+  Features: 64
+  Mean Importance: 0.1605
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [38, 29, 62, 58, 39]
+  Top-5 Values: ['1.0000', '0.7548', '0.7147', '0.6071', '0.5222']
+
+Layer: LF_l4_FDCA.slice_att.linear.1
+  Features: 64
+  Mean Importance: 0.1374
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [38, 29, 62, 58, 39]
+  Top-5 Values: ['1.0000', '0.7550', '0.7149', '0.6074', '0.5226']
+
+Layer: LF_l4_FDCA.slice_att.linear.2
+  Features: 16
+  Mean Importance: 0.3033
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 4, 5, 11]
+  Top-5 Values: ['1.0000', '0.9537', '0.9038', '0.8966', '0.4855']
+
+Layer: LF_l4_FDCA.slice_att.linear
+  Features: 16
+  Mean Importance: 0.3033
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 4, 5, 11]
+  Top-5 Values: ['1.0000', '0.9537', '0.9038', '0.8966', '0.4855']
+
+Layer: LF_l4_FDCA.slice_att.non_linear
+  Features: 16
+  Mean Importance: 0.1781
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 5, 14, 13]
+  Top-5 Values: ['1.0000', '0.9533', '0.8964', '0.0000', '0.0000']
+
+Layer: LF_l4_FDCA.slice_att.mean
+  Features: 16
+  Mean Importance: 0.1608
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 15, 0, 2, 7]
+  Top-5 Values: ['1.0000', '0.3939', '0.3641', '0.1583', '0.1256']
+
+Layer: LF_l4_FDCA.slice_att.log_diag
+  Features: 16
+  Mean Importance: 0.1606
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 6, 2, 0, 14]
+  Top-5 Values: ['1.0000', '0.3175', '0.2959', '0.2815', '0.1420']
+
+Layer: LF_l4_FDCA.slice_att.factor
+  Features: 80
+  Mean Importance: 0.1741
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 75, 79, 77, 12]
+  Top-5 Values: ['1.0000', '0.9221', '0.7583', '0.6198', '0.6093']
+
+Layer: LF_l4_FDCA.slice_att
+  Features: 16
+  Mean Importance: 0.0627
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.0026', '0.0007', '0.0002', '0.0000']
+
+Layer: LF_l4_FDCA
+  Features: 16
+  Mean Importance: 0.4848
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 14, 0, 13, 1]
+  Top-5 Values: ['1.0000', '0.9719', '0.9125', '0.9062', '0.8094']
+
+Layer: LF_l5_FDCA.semantic_att.linear.0
+  Features: 16
+  Mean Importance: 0.2146
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [5, 12, 1, 7, 10]
+  Top-5 Values: ['1.0000', '0.5327', '0.4318', '0.4077', '0.2751']
+
+Layer: LF_l5_FDCA.semantic_att.linear.1
+  Features: 16
+  Mean Importance: 0.0625
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [14, 15, 13, 12, 11]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: LF_l5_FDCA.semantic_att.linear.2
+  Features: 256
+  Mean Importance: 0.0826
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [97, 195, 121, 189, 16]
+  Top-5 Values: ['1.0000', '0.8256', '0.6770', '0.6252', '0.5513']
+
+Layer: LF_l5_FDCA.semantic_att.linear
+  Features: 256
+  Mean Importance: 0.0826
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [97, 195, 121, 189, 16]
+  Top-5 Values: ['1.0000', '0.8256', '0.6770', '0.6252', '0.5513']
+
+Layer: LF_l5_FDCA.semantic_att
+  Features: 8
+  Mean Importance: 0.2259
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 2, 6]
+  Top-5 Values: ['1.0000', '0.2879', '0.2879', '0.0955', '0.0955']
+
+Layer: LF_l5_FDCA.positional_att.conv
+  Features: 8
+  Mean Importance: 0.2178
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 2, 6]
+  Top-5 Values: ['1.0000', '0.3977', '0.1936', '0.0734', '0.0553']
+
+Layer: LF_l5_FDCA.positional_att
+  Features: 8
+  Mean Importance: 0.3845
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 2, 5, 3]
+  Top-5 Values: ['1.0000', '0.8649', '0.5380', '0.3476', '0.2796']
+
+Layer: LF_l5_FDCA.slice_att.linear.0
+  Features: 32
+  Mean Importance: 0.3792
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 3, 21, 11, 23]
+  Top-5 Values: ['1.0000', '0.9033', '0.7588', '0.7428', '0.7252']
+
+Layer: LF_l5_FDCA.slice_att.linear.1
+  Features: 32
+  Mean Importance: 0.1685
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 3, 28, 27, 24]
+  Top-5 Values: ['1.0000', '0.9045', '0.6415', '0.5395', '0.3225']
+
+Layer: LF_l5_FDCA.slice_att.linear.2
+  Features: 8
+  Mean Importance: 0.3863
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 4, 3, 0]
+  Top-5 Values: ['1.0000', '0.9970', '0.5027', '0.2416', '0.1942']
+
+Layer: LF_l5_FDCA.slice_att.linear
+  Features: 8
+  Mean Importance: 0.3863
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 4, 3, 0]
+  Top-5 Values: ['1.0000', '0.9970', '0.5027', '0.2416', '0.1942']
+
+Layer: LF_l5_FDCA.slice_att.non_linear
+  Features: 8
+  Mean Importance: 0.1341
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 5, 7, 4, 3]
+  Top-5 Values: ['1.0000', '0.0727', '0.0000', '0.0000', '0.0000']
+
+Layer: LF_l5_FDCA.slice_att.mean
+  Features: 8
+  Mean Importance: 0.2064
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 4]
+  Top-5 Values: ['1.0000', '0.3360', '0.3114', '0.0033', '0.0002']
+
+Layer: LF_l5_FDCA.slice_att.log_diag
+  Features: 8
+  Mean Importance: 0.1539
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.1113', '0.0470', '0.0446', '0.0261']
+
+Layer: LF_l5_FDCA.slice_att.factor
+  Features: 40
+  Mean Importance: 0.1129
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 5, 3, 38, 7]
+  Top-5 Values: ['1.0000', '0.5344', '0.4299', '0.4231', '0.3425']
+
+Layer: LF_l5_FDCA.slice_att
+  Features: 8
+  Mean Importance: 0.2291
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 6, 2, 5]
+  Top-5 Values: ['1.0000', '0.3816', '0.2569', '0.1457', '0.0270']
+
+Layer: LF_l5_FDCA
+  Features: 8
+  Mean Importance: 0.3512
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 4, 5, 7]
+  Top-5 Values: ['1.0000', '0.4627', '0.4391', '0.3742', '0.3614']
+
+Layer: HF_l4_FDCA.semantic_att.linear.0
+  Features: 8
+  Mean Importance: 0.4405
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 5, 6, 4, 7]
+  Top-5 Values: ['1.0000', '0.9514', '0.6225', '0.5600', '0.1996']
+
+Layer: HF_l4_FDCA.semantic_att.linear.1
+  Features: 8
+  Mean Importance: 0.4360
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 5, 4, 7, 1]
+  Top-5 Values: ['1.0000', '0.9654', '0.6871', '0.4308', '0.4042']
+
+Layer: HF_l4_FDCA.semantic_att.linear.2
+  Features: 128
+  Mean Importance: 0.0565
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [95, 110, 59, 82, 98]
+  Top-5 Values: ['1.0000', '0.4557', '0.3644', '0.3473', '0.2948']
+
+Layer: HF_l4_FDCA.semantic_att.linear
+  Features: 128
+  Mean Importance: 0.0565
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [95, 110, 59, 82, 98]
+  Top-5 Values: ['1.0000', '0.4557', '0.3644', '0.3473', '0.2948']
+
+Layer: HF_l4_FDCA.semantic_att
+  Features: 16
+  Mean Importance: 0.1976
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 15, 14, 2]
+  Top-5 Values: ['1.0000', '0.3680', '0.3680', '0.2790', '0.2790']
+
+Layer: HF_l4_FDCA.positional_att.conv
+  Features: 16
+  Mean Importance: 0.1901
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 14, 2, 15]
+  Top-5 Values: ['1.0000', '0.9691', '0.3109', '0.2640', '0.1554']
+
+Layer: HF_l4_FDCA.positional_att
+  Features: 16
+  Mean Importance: 0.2944
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 2, 3, 13]
+  Top-5 Values: ['1.0000', '0.8524', '0.4223', '0.4062', '0.3557']
+
+Layer: HF_l4_FDCA.slice_att.linear.0
+  Features: 64
+  Mean Importance: 0.2853
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [35, 0, 38, 10, 43]
+  Top-5 Values: ['1.0000', '0.9352', '0.7980', '0.7635', '0.6924']
+
+Layer: HF_l4_FDCA.slice_att.linear.1
+  Features: 64
+  Mean Importance: 0.1696
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [35, 10, 43, 47, 53]
+  Top-5 Values: ['1.0000', '0.7643', '0.6936', '0.6563', '0.6000']
+
+Layer: HF_l4_FDCA.slice_att.linear.2
+  Features: 16
+  Mean Importance: 0.3002
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 1, 0, 10, 14]
+  Top-5 Values: ['1.0000', '0.7041', '0.6827', '0.5732', '0.4186']
+
+Layer: HF_l4_FDCA.slice_att.linear
+  Features: 16
+  Mean Importance: 0.3002
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 1, 0, 10, 14]
+  Top-5 Values: ['1.0000', '0.7041', '0.6827', '0.5732', '0.4186']
+
+Layer: HF_l4_FDCA.slice_att.non_linear
+  Features: 16
+  Mean Importance: 0.1567
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [12, 14, 6, 9, 0]
+  Top-5 Values: ['1.0000', '0.4029', '0.3326', '0.2747', '0.2416']
+
+Layer: HF_l4_FDCA.slice_att.mean
+  Features: 16
+  Mean Importance: 0.0790
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 2, 14]
+  Top-5 Values: ['1.0000', '0.1811', '0.0498', '0.0171', '0.0070']
+
+Layer: HF_l4_FDCA.slice_att.log_diag
+  Features: 16
+  Mean Importance: 0.1094
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.3526', '0.2997', '0.0567', '0.0247']
+
+Layer: HF_l4_FDCA.slice_att.factor
+  Features: 80
+  Mean Importance: 0.0420
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [4, 2, 77, 3, 75]
+  Top-5 Values: ['1.0000', '0.4426', '0.3088', '0.2678', '0.2520']
+
+Layer: HF_l4_FDCA.slice_att
+  Features: 16
+  Mean Importance: 0.1534
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 13, 3, 2]
+  Top-5 Values: ['1.0000', '0.4396', '0.1470', '0.1436', '0.1391']
+
+Layer: HF_l4_FDCA
+  Features: 16
+  Mean Importance: 0.3812
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 8, 1, 15, 3]
+  Top-5 Values: ['1.0000', '0.6119', '0.5506', '0.5246', '0.4913']
+
+Layer: HF_l5_FDCA.semantic_att.linear.0
+  Features: 16
+  Mean Importance: 0.1255
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 13, 1, 3, 2]
+  Top-5 Values: ['1.0000', '0.6586', '0.2792', '0.0149', '0.0144']
+
+Layer: HF_l5_FDCA.semantic_att.linear.1
+  Features: 16
+  Mean Importance: 0.0625
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 15, 14, 13, 12]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: HF_l5_FDCA.semantic_att.linear.2
+  Features: 256
+  Mean Importance: 0.0910
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [185, 26, 141, 121, 192]
+  Top-5 Values: ['1.0000', '0.9384', '0.6246', '0.5185', '0.4395']
+
+Layer: HF_l5_FDCA.semantic_att.linear
+  Features: 256
+  Mean Importance: 0.0910
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [185, 26, 141, 121, 192]
+  Top-5 Values: ['1.0000', '0.9384', '0.6246', '0.5185', '0.4395']
+
+Layer: HF_l5_FDCA.semantic_att
+  Features: 8
+  Mean Importance: 0.2495
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.3321', '0.3321', '0.1373', '0.1373']
+
+Layer: HF_l5_FDCA.positional_att.conv
+  Features: 8
+  Mean Importance: 0.2398
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 4, 3, 7]
+  Top-5 Values: ['1.0000', '0.7192', '0.1096', '0.0436', '0.0368']
+
+Layer: HF_l5_FDCA.positional_att
+  Features: 8
+  Mean Importance: 0.2905
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 6, 2, 5]
+  Top-5 Values: ['1.0000', '0.4550', '0.3124', '0.2392', '0.1353']
+
+Layer: HF_l5_FDCA.slice_att.linear.0
+  Features: 32
+  Mean Importance: 0.3933
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 6, 28, 29, 23]
+  Top-5 Values: ['1.0000', '0.9783', '0.9507', '0.8954', '0.8142']
+
+Layer: HF_l5_FDCA.slice_att.linear.1
+  Features: 32
+  Mean Importance: 0.3194
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 6, 28, 29, 23]
+  Top-5 Values: ['1.0000', '0.9785', '0.9511', '0.8964', '0.8160']
+
+Layer: HF_l5_FDCA.slice_att.linear.2
+  Features: 8
+  Mean Importance: 0.3999
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 3, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.7634', '0.7475', '0.6276', '0.0243']
+
+Layer: HF_l5_FDCA.slice_att.linear
+  Features: 8
+  Mean Importance: 0.3999
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 3, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.7634', '0.7475', '0.6276', '0.0243']
+
+Layer: HF_l5_FDCA.slice_att.non_linear
+  Features: 8
+  Mean Importance: 0.1250
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 5, 4]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: HF_l5_FDCA.slice_att.mean
+  Features: 8
+  Mean Importance: 0.2454
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 2, 4]
+  Top-5 Values: ['1.0000', '0.5574', '0.1877', '0.1227', '0.0540']
+
+Layer: HF_l5_FDCA.slice_att.log_diag
+  Features: 8
+  Mean Importance: 0.2180
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 4, 2]
+  Top-5 Values: ['1.0000', '0.4573', '0.1549', '0.0526', '0.0518']
+
+Layer: HF_l5_FDCA.slice_att.factor
+  Features: 40
+  Mean Importance: 0.1389
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 0, 35, 3, 7]
+  Top-5 Values: ['1.0000', '0.8462', '0.8232', '0.4433', '0.4328']
+
+Layer: HF_l5_FDCA.slice_att
+  Features: 8
+  Mean Importance: 0.1958
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 6, 1, 2]
+  Top-5 Values: ['1.0000', '0.2454', '0.1254', '0.0985', '0.0659']
+
+Layer: HF_l5_FDCA
+  Features: 8
+  Mean Importance: 0.5404
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 4, 5, 1, 3]
+  Top-5 Values: ['1.0000', '0.9524', '0.7051', '0.6928', '0.4959']
+
+======================================================================
+✓ Mechanistic analysis complete
+
+[3] Generating Grad-CAM...
+❌ Warning: Grad-CAM generation failed: Output 0 of BackwardHookFunctionBackward is a view and is being modified inplace. This view was created inside a custom Function (or because an input was returned as-is) and the autograd logic to handle view+inplace would override the custom backward associated with the custom Function, leading to incorrect gradients. This behavior is forbidden. You can fix this by cloning the output of the custom Function.
+Traceback (most recent call last):
+  File "/home/manish/BrainTumorHFF/HFF/eval_new.py", line 320, in evaluate_batch
+    output = self.model(low_input, high_input)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 438, in forward
+    layer1_LF, layer2_LF, layer3_LF, layer4_LF_1, layer5_LF_1 = self.mobilenet_encoder_b1(input1)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 104, in forward
+    f1 = self.enc1(x)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 84, in forward
+    return x + self.conv(x)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 103, in forward
+    return F.relu(input, inplace=self.inplace)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/functional.py", line 1455, in relu
+    result = torch.relu_(input)
+RuntimeError: Output 0 of BackwardHookFunctionBackward is a view and is being modified inplace. This view was created inside a custom Function (or because an input was returned as-is) and the autograd logic to handle view+inplace would override the custom backward associated with the custom Function, leading to incorrect gradients. This behavior is forbidden. You can fix this by cloning the output of the custom Function.
+[4] Analyzing frequency components...
+Warning: Frequency analysis failed: Can't call numpy() on Tensor that requires grad. Use tensor.detach().numpy() instead.
+✓ Evaluation complete for sample_0000
+Evaluating:   3%|2         | 1/38 [00:17<10:45, 17.44s/it]
+[1] Getting primary prediction...
+
+[METRICS FOR sample_0001]
+==================================================
+class_0: Dice=0.9977, IoU=0.9954
+class_1: Dice=0.9026, IoU=0.8225
+class_2: Dice=0.9440, IoU=0.8939
+class_3: Dice=0.9363, IoU=0.8802
+==================================================
+
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai_2025-11-16_12-03-09/attention/sample_0001_attention.png
+
+[MECHANISTIC INTERPRETABILITY ANALYSIS]
+======================================================================
+Sample: sample_0001
+======================================================================
+
+Layer: LF_l4_FDCA.semantic_att.linear.0
+  Features: 8
+  Mean Importance: 0.2166
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 1, 6, 4]
+  Top-5 Values: ['1.0000', '0.5820', '0.0846', '0.0632', '0.0021']
+
+Layer: LF_l4_FDCA.semantic_att.linear.1
+  Features: 8
+  Mean Importance: 0.1981
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 2, 5, 6]
+  Top-5 Values: ['1.0000', '0.5824', '0.0014', '0.0011', '0.0000']
+
+Layer: LF_l4_FDCA.semantic_att.linear.2
+  Features: 128
+  Mean Importance: 0.2653
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [118, 58, 126, 36, 92]
+  Top-5 Values: ['1.0000', '0.7891', '0.7434', '0.7429', '0.6631']
+
+Layer: LF_l4_FDCA.semantic_att.linear
+  Features: 128
+  Mean Importance: 0.2653
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [118, 58, 126, 36, 92]
+  Top-5 Values: ['1.0000', '0.7891', '0.7434', '0.7429', '0.6631']
+
+Layer: LF_l4_FDCA.semantic_att
+  Features: 16
+  Mean Importance: 0.1773
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.3879', '0.3879', '0.2697', '0.2697']
+
+Layer: LF_l4_FDCA.positional_att.conv
+  Features: 16
+  Mean Importance: 0.1108
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 15, 14, 2]
+  Top-5 Values: ['1.0000', '0.4252', '0.1465', '0.0764', '0.0608']
+
+Layer: LF_l4_FDCA.positional_att
+  Features: 16
+  Mean Importance: 0.0748
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 14, 2, 1]
+  Top-5 Values: ['1.0000', '0.0848', '0.0467', '0.0236', '0.0235']
+
+Layer: LF_l4_FDCA.slice_att.linear.0
+  Features: 64
+  Mean Importance: 0.1612
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [38, 29, 62, 58, 39]
+  Top-5 Values: ['1.0000', '0.7572', '0.7188', '0.6067', '0.5302']
+
+Layer: LF_l4_FDCA.slice_att.linear.1
+  Features: 64
+  Mean Importance: 0.1377
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [38, 29, 62, 58, 39]
+  Top-5 Values: ['1.0000', '0.7573', '0.7189', '0.6068', '0.5303']
+
+Layer: LF_l4_FDCA.slice_att.linear.2
+  Features: 16
+  Mean Importance: 0.3033
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 4, 5, 11]
+  Top-5 Values: ['1.0000', '0.9542', '0.9033', '0.8969', '0.4854']
+
+Layer: LF_l4_FDCA.slice_att.linear
+  Features: 16
+  Mean Importance: 0.3033
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 4, 5, 11]
+  Top-5 Values: ['1.0000', '0.9542', '0.9033', '0.8969', '0.4854']
+
+Layer: LF_l4_FDCA.slice_att.non_linear
+  Features: 16
+  Mean Importance: 0.1782
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 5, 14, 13]
+  Top-5 Values: ['1.0000', '0.9542', '0.8970', '0.0000', '0.0000']
+
+Layer: LF_l4_FDCA.slice_att.mean
+  Features: 16
+  Mean Importance: 0.1609
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 15, 0, 2, 7]
+  Top-5 Values: ['1.0000', '0.3939', '0.3641', '0.1583', '0.1256']
+
+Layer: LF_l4_FDCA.slice_att.log_diag
+  Features: 16
+  Mean Importance: 0.1606
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 6, 2, 0, 14]
+  Top-5 Values: ['1.0000', '0.3175', '0.2959', '0.2814', '0.1419']
+
+Layer: LF_l4_FDCA.slice_att.factor
+  Features: 80
+  Mean Importance: 0.1741
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 75, 79, 77, 12]
+  Top-5 Values: ['1.0000', '0.9221', '0.7584', '0.6198', '0.6093']
+
+Layer: LF_l4_FDCA.slice_att
+  Features: 16
+  Mean Importance: 0.0648
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 2, 14]
+  Top-5 Values: ['1.0000', '0.0170', '0.0108', '0.0050', '0.0031']
+
+Layer: LF_l4_FDCA
+  Features: 16
+  Mean Importance: 0.6260
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 0, 14, 10, 9]
+  Top-5 Values: ['1.0000', '0.9838', '0.9595', '0.8462', '0.8381']
+
+Layer: LF_l5_FDCA.semantic_att.linear.0
+  Features: 16
+  Mean Importance: 0.2080
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [5, 12, 1, 7, 10]
+  Top-5 Values: ['1.0000', '0.5342', '0.4194', '0.4040', '0.2695']
+
+Layer: LF_l5_FDCA.semantic_att.linear.1
+  Features: 16
+  Mean Importance: 0.0625
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [14, 15, 13, 12, 11]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: LF_l5_FDCA.semantic_att.linear.2
+  Features: 256
+  Mean Importance: 0.0826
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [97, 195, 121, 189, 16]
+  Top-5 Values: ['1.0000', '0.8256', '0.6770', '0.6252', '0.5513']
+
+Layer: LF_l5_FDCA.semantic_att.linear
+  Features: 256
+  Mean Importance: 0.0826
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [97, 195, 121, 189, 16]
+  Top-5 Values: ['1.0000', '0.8256', '0.6770', '0.6252', '0.5513']
+
+Layer: LF_l5_FDCA.semantic_att
+  Features: 8
+  Mean Importance: 0.2188
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.2494', '0.2494', '0.1087', '0.1087']
+
+Layer: LF_l5_FDCA.positional_att.conv
+  Features: 8
+  Mean Importance: 0.2133
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 2, 6]
+  Top-5 Values: ['1.0000', '0.3868', '0.1881', '0.0696', '0.0475']
+
+Layer: LF_l5_FDCA.positional_att
+  Features: 8
+  Mean Importance: 0.3648
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 2, 5, 3]
+  Top-5 Values: ['1.0000', '0.9054', '0.5468', '0.1867', '0.1530']
+
+Layer: LF_l5_FDCA.slice_att.linear.0
+  Features: 32
+  Mean Importance: 0.4276
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 23, 28, 21, 17]
+  Top-5 Values: ['1.0000', '0.9306', '0.8073', '0.7753', '0.7652']
+
+Layer: LF_l5_FDCA.slice_att.linear.1
+  Features: 32
+  Mean Importance: 0.2221
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 28, 18, 13, 29]
+  Top-5 Values: ['1.0000', '0.8121', '0.7493', '0.6087', '0.5276']
+
+Layer: LF_l5_FDCA.slice_att.linear.2
+  Features: 8
+  Mean Importance: 0.3863
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 4, 3, 0]
+  Top-5 Values: ['1.0000', '0.9970', '0.5027', '0.2416', '0.1942']
+
+Layer: LF_l5_FDCA.slice_att.linear
+  Features: 8
+  Mean Importance: 0.3863
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 4, 3, 0]
+  Top-5 Values: ['1.0000', '0.9970', '0.5027', '0.2416', '0.1942']
+
+Layer: LF_l5_FDCA.slice_att.non_linear
+  Features: 8
+  Mean Importance: 0.1341
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 5, 7, 4, 3]
+  Top-5 Values: ['1.0000', '0.0725', '0.0000', '0.0000', '0.0000']
+
+Layer: LF_l5_FDCA.slice_att.mean
+  Features: 8
+  Mean Importance: 0.2064
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 4]
+  Top-5 Values: ['1.0000', '0.3360', '0.3114', '0.0033', '0.0002']
+
+Layer: LF_l5_FDCA.slice_att.log_diag
+  Features: 8
+  Mean Importance: 0.1539
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.1113', '0.0470', '0.0446', '0.0261']
+
+Layer: LF_l5_FDCA.slice_att.factor
+  Features: 40
+  Mean Importance: 0.1129
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 5, 3, 38, 7]
+  Top-5 Values: ['1.0000', '0.5344', '0.4299', '0.4231', '0.3425']
+
+Layer: LF_l5_FDCA.slice_att
+  Features: 8
+  Mean Importance: 0.3702
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 6, 2, 0, 1]
+  Top-5 Values: ['1.0000', '0.8078', '0.5129', '0.4779', '0.1012']
+
+Layer: LF_l5_FDCA
+  Features: 8
+  Mean Importance: 0.5621
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 3, 6, 1, 4]
+  Top-5 Values: ['1.0000', '0.9193', '0.7263', '0.7115', '0.4833']
+
+Layer: HF_l4_FDCA.semantic_att.linear.0
+  Features: 8
+  Mean Importance: 0.4749
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 5, 4, 6, 1]
+  Top-5 Values: ['1.0000', '0.8652', '0.7467', '0.7109', '0.2683']
+
+Layer: HF_l4_FDCA.semantic_att.linear.1
+  Features: 8
+  Mean Importance: 0.4337
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 5, 4, 1, 7]
+  Top-5 Values: ['1.0000', '0.8952', '0.8031', '0.4311', '0.3399']
+
+Layer: HF_l4_FDCA.semantic_att.linear.2
+  Features: 128
+  Mean Importance: 0.0565
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [95, 110, 59, 82, 98]
+  Top-5 Values: ['1.0000', '0.4557', '0.3644', '0.3473', '0.2948']
+
+Layer: HF_l4_FDCA.semantic_att.linear
+  Features: 128
+  Mean Importance: 0.0565
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [95, 110, 59, 82, 98]
+  Top-5 Values: ['1.0000', '0.4557', '0.3644', '0.3473', '0.2948']
+
+Layer: HF_l4_FDCA.semantic_att
+  Features: 16
+  Mean Importance: 0.2177
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 15, 2, 14]
+  Top-5 Values: ['1.0000', '0.4122', '0.4122', '0.3448', '0.3448']
+
+Layer: HF_l4_FDCA.positional_att.conv
+  Features: 16
+  Mean Importance: 0.2016
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 14, 2, 15]
+  Top-5 Values: ['1.0000', '0.9998', '0.3078', '0.2483', '0.1707']
+
+Layer: HF_l4_FDCA.positional_att
+  Features: 16
+  Mean Importance: 0.3421
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 0, 2, 3, 4]
+  Top-5 Values: ['1.0000', '0.8296', '0.5407', '0.5311', '0.4827']
+
+Layer: HF_l4_FDCA.slice_att.linear.0
+  Features: 64
+  Mean Importance: 0.2736
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [35, 0, 10, 38, 43]
+  Top-5 Values: ['1.0000', '0.9206', '0.7431', '0.7247', '0.7154']
+
+Layer: HF_l4_FDCA.slice_att.linear.1
+  Features: 64
+  Mean Importance: 0.1663
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [35, 10, 43, 47, 53]
+  Top-5 Values: ['1.0000', '0.7450', '0.7174', '0.6853', '0.5379']
+
+Layer: HF_l4_FDCA.slice_att.linear.2
+  Features: 16
+  Mean Importance: 0.2996
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 1, 0, 10, 14]
+  Top-5 Values: ['1.0000', '0.6997', '0.6753', '0.5668', '0.4198']
+
+Layer: HF_l4_FDCA.slice_att.linear
+  Features: 16
+  Mean Importance: 0.2996
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 1, 0, 10, 14]
+  Top-5 Values: ['1.0000', '0.6997', '0.6753', '0.5668', '0.4198']
+
+Layer: HF_l4_FDCA.slice_att.non_linear
+  Features: 16
+  Mean Importance: 0.1919
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [12, 14, 9, 1, 10]
+  Top-5 Values: ['1.0000', '0.7026', '0.4843', '0.4087', '0.2292']
+
+Layer: HF_l4_FDCA.slice_att.mean
+  Features: 16
+  Mean Importance: 0.0790
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 2, 14]
+  Top-5 Values: ['1.0000', '0.1811', '0.0498', '0.0171', '0.0070']
+
+Layer: HF_l4_FDCA.slice_att.log_diag
+  Features: 16
+  Mean Importance: 0.1095
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.3528', '0.2996', '0.0566', '0.0247']
+
+Layer: HF_l4_FDCA.slice_att.factor
+  Features: 80
+  Mean Importance: 0.0420
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [4, 2, 77, 3, 75]
+  Top-5 Values: ['1.0000', '0.4426', '0.3088', '0.2678', '0.2521']
+
+Layer: HF_l4_FDCA.slice_att
+  Features: 16
+  Mean Importance: 0.2099
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 2, 3, 14]
+  Top-5 Values: ['1.0000', '0.9030', '0.3280', '0.2179', '0.2179']
+
+Layer: HF_l4_FDCA
+  Features: 16
+  Mean Importance: 0.4165
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 15, 8, 9]
+  Top-5 Values: ['1.0000', '0.8232', '0.7638', '0.5844', '0.5586']
+
+Layer: HF_l5_FDCA.semantic_att.linear.0
+  Features: 16
+  Mean Importance: 0.1253
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 13, 1, 3, 2]
+  Top-5 Values: ['1.0000', '0.6604', '0.2785', '0.0146', '0.0141']
+
+Layer: HF_l5_FDCA.semantic_att.linear.1
+  Features: 16
+  Mean Importance: 0.0625
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 15, 14, 13, 12]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: HF_l5_FDCA.semantic_att.linear.2
+  Features: 256
+  Mean Importance: 0.0910
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [185, 26, 141, 121, 192]
+  Top-5 Values: ['1.0000', '0.9384', '0.6246', '0.5185', '0.4395']
+
+Layer: HF_l5_FDCA.semantic_att.linear
+  Features: 256
+  Mean Importance: 0.0910
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [185, 26, 141, 121, 192]
+  Top-5 Values: ['1.0000', '0.9384', '0.6246', '0.5185', '0.4395']
+
+Layer: HF_l5_FDCA.semantic_att
+  Features: 8
+  Mean Importance: 0.2915
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.4875', '0.4875', '0.1577', '0.1577']
+
+Layer: HF_l5_FDCA.positional_att.conv
+  Features: 8
+  Mean Importance: 0.3573
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.8935', '0.3431', '0.2846', '0.2680']
+
+Layer: HF_l5_FDCA.positional_att
+  Features: 8
+  Mean Importance: 0.2566
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 6, 1, 2]
+  Top-5 Values: ['1.0000', '0.6503', '0.1458', '0.1202', '0.0770']
+
+Layer: HF_l5_FDCA.slice_att.linear.0
+  Features: 32
+  Mean Importance: 0.3882
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 28, 3, 13, 8]
+  Top-5 Values: ['1.0000', '0.8289', '0.7806', '0.7377', '0.7248']
+
+Layer: HF_l5_FDCA.slice_att.linear.1
+  Features: 32
+  Mean Importance: 0.3013
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 28, 13, 8, 23]
+  Top-5 Values: ['1.0000', '0.8293', '0.7382', '0.7253', '0.6937']
+
+Layer: HF_l5_FDCA.slice_att.linear.2
+  Features: 8
+  Mean Importance: 0.3999
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 3, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.7633', '0.7475', '0.6275', '0.0242']
+
+Layer: HF_l5_FDCA.slice_att.linear
+  Features: 8
+  Mean Importance: 0.3999
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 3, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.7633', '0.7475', '0.6275', '0.0242']
+
+Layer: HF_l5_FDCA.slice_att.non_linear
+  Features: 8
+  Mean Importance: 0.1250
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 5, 4]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: HF_l5_FDCA.slice_att.mean
+  Features: 8
+  Mean Importance: 0.2454
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 2, 4]
+  Top-5 Values: ['1.0000', '0.5574', '0.1877', '0.1227', '0.0540']
+
+Layer: HF_l5_FDCA.slice_att.log_diag
+  Features: 8
+  Mean Importance: 0.2180
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 4, 2]
+  Top-5 Values: ['1.0000', '0.4573', '0.1549', '0.0526', '0.0518']
+
+Layer: HF_l5_FDCA.slice_att.factor
+  Features: 40
+  Mean Importance: 0.1389
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 0, 35, 3, 7]
+  Top-5 Values: ['1.0000', '0.8462', '0.8232', '0.4433', '0.4328']
+
+Layer: HF_l5_FDCA.slice_att
+  Features: 8
+  Mean Importance: 0.2073
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.4945', '0.0995', '0.0311', '0.0244']
+
+Layer: HF_l5_FDCA
+  Features: 8
+  Mean Importance: 0.5332
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 6, 1, 5]
+  Top-5 Values: ['1.0000', '0.9647', '0.7738', '0.6160', '0.5058']
+
+======================================================================
+✓ Mechanistic analysis complete
+
+[3] Generating Grad-CAM...
+❌ Warning: Grad-CAM generation failed: Output 0 of BackwardHookFunctionBackward is a view and is being modified inplace. This view was created inside a custom Function (or because an input was returned as-is) and the autograd logic to handle view+inplace would override the custom backward associated with the custom Function, leading to incorrect gradients. This behavior is forbidden. You can fix this by cloning the output of the custom Function.
+Traceback (most recent call last):
+  File "/home/manish/BrainTumorHFF/HFF/eval_new.py", line 320, in evaluate_batch
+    output = self.model(low_input, high_input)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 438, in forward
+    layer1_LF, layer2_LF, layer3_LF, layer4_LF_1, layer5_LF_1 = self.mobilenet_encoder_b1(input1)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 104, in forward
+    f1 = self.enc1(x)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 84, in forward
+    return x + self.conv(x)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 103, in forward
+    return F.relu(input, inplace=self.inplace)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/functional.py", line 1455, in relu
+    result = torch.relu_(input)
+RuntimeError: Output 0 of BackwardHookFunctionBackward is a view and is being modified inplace. This view was created inside a custom Function (or because an input was returned as-is) and the autograd logic to handle view+inplace would override the custom backward associated with the custom Function, leading to incorrect gradients. This behavior is forbidden. You can fix this by cloning the output of the custom Function.
+[4] Analyzing frequency components...
+Warning: Frequency analysis failed: Can't call numpy() on Tensor that requires grad. Use tensor.detach().numpy() instead.
+✓ Evaluation complete for sample_0001
+Evaluating:   5%|5         | 2/38 [00:28<08:11, 13.64s/it]
+[1] Getting primary prediction...
+
+[METRICS FOR sample_0002]
+==================================================
+class_0: Dice=0.9970, IoU=0.9940
+class_1: Dice=0.9447, IoU=0.8952
+class_2: Dice=0.6756, IoU=0.5102
+class_3: Dice=0.8275, IoU=0.7058
+==================================================
+
+[2] Generating attention maps...
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+✓ Saved: outputs/xai_2025-11-16_12-03-09/attention/sample_0002_attention.png
+
+[MECHANISTIC INTERPRETABILITY ANALYSIS]
+======================================================================
+Sample: sample_0002
+======================================================================
+
+Layer: LF_l4_FDCA.semantic_att.linear.0
+  Features: 8
+  Mean Importance: 0.2166
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 1, 6, 4]
+  Top-5 Values: ['1.0000', '0.5817', '0.0847', '0.0635', '0.0022']
+
+Layer: LF_l4_FDCA.semantic_att.linear.1
+  Features: 8
+  Mean Importance: 0.1981
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 2, 5, 6]
+  Top-5 Values: ['1.0000', '0.5822', '0.0015', '0.0011', '0.0000']
+
+Layer: LF_l4_FDCA.semantic_att.linear.2
+  Features: 128
+  Mean Importance: 0.2641
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [118, 58, 126, 36, 92]
+  Top-5 Values: ['1.0000', '0.7873', '0.7444', '0.7438', '0.6633']
+
+Layer: LF_l4_FDCA.semantic_att.linear
+  Features: 128
+  Mean Importance: 0.2641
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [118, 58, 126, 36, 92]
+  Top-5 Values: ['1.0000', '0.7873', '0.7444', '0.7438', '0.6633']
+
+Layer: LF_l4_FDCA.semantic_att
+  Features: 16
+  Mean Importance: 0.1411
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 2, 14]
+  Top-5 Values: ['1.0000', '0.2918', '0.2918', '0.1677', '0.1677']
+
+Layer: LF_l4_FDCA.positional_att.conv
+  Features: 16
+  Mean Importance: 0.1022
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 15, 2, 14]
+  Top-5 Values: ['1.0000', '0.4942', '0.0603', '0.0323', '0.0322']
+
+Layer: LF_l4_FDCA.positional_att
+  Features: 16
+  Mean Importance: 0.0675
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.0346', '0.0241', '0.0102', '0.0039']
+
+Layer: LF_l4_FDCA.slice_att.linear.0
+  Features: 64
+  Mean Importance: 0.1604
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [38, 29, 62, 58, 39]
+  Top-5 Values: ['1.0000', '0.7549', '0.7148', '0.6071', '0.5226']
+
+Layer: LF_l4_FDCA.slice_att.linear.1
+  Features: 64
+  Mean Importance: 0.1375
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [38, 29, 62, 58, 39]
+  Top-5 Values: ['1.0000', '0.7551', '0.7151', '0.6074', '0.5230']
+
+Layer: LF_l4_FDCA.slice_att.linear.2
+  Features: 16
+  Mean Importance: 0.3033
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 4, 5, 11]
+  Top-5 Values: ['1.0000', '0.9537', '0.9038', '0.8966', '0.4855']
+
+Layer: LF_l4_FDCA.slice_att.linear
+  Features: 16
+  Mean Importance: 0.3033
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 4, 5, 11]
+  Top-5 Values: ['1.0000', '0.9537', '0.9038', '0.8966', '0.4855']
+
+Layer: LF_l4_FDCA.slice_att.non_linear
+  Features: 16
+  Mean Importance: 0.1781
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 3, 5, 14, 13]
+  Top-5 Values: ['1.0000', '0.9533', '0.8965', '0.0000', '0.0000']
+
+Layer: LF_l4_FDCA.slice_att.mean
+  Features: 16
+  Mean Importance: 0.1608
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 15, 0, 2, 7]
+  Top-5 Values: ['1.0000', '0.3939', '0.3641', '0.1583', '0.1256']
+
+Layer: LF_l4_FDCA.slice_att.log_diag
+  Features: 16
+  Mean Importance: 0.1606
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 6, 2, 0, 14]
+  Top-5 Values: ['1.0000', '0.3175', '0.2959', '0.2815', '0.1420']
+
+Layer: LF_l4_FDCA.slice_att.factor
+  Features: 80
+  Mean Importance: 0.1741
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 75, 79, 77, 12]
+  Top-5 Values: ['1.0000', '0.9221', '0.7583', '0.6198', '0.6093']
+
+Layer: LF_l4_FDCA.slice_att
+  Features: 16
+  Mean Importance: 0.0626
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.0011', '0.0005', '0.0000', '0.0000']
+
+Layer: LF_l4_FDCA
+  Features: 16
+  Mean Importance: 0.4155
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [9, 8, 6, 7, 11]
+  Top-5 Values: ['1.0000', '0.9730', '0.9189', '0.8649', '0.5676']
+
+Layer: LF_l5_FDCA.semantic_att.linear.0
+  Features: 16
+  Mean Importance: 0.2163
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [5, 12, 1, 7, 10]
+  Top-5 Values: ['1.0000', '0.5443', '0.4337', '0.4119', '0.2774']
+
+Layer: LF_l5_FDCA.semantic_att.linear.1
+  Features: 16
+  Mean Importance: 0.0625
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [14, 15, 13, 12, 11]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: LF_l5_FDCA.semantic_att.linear.2
+  Features: 256
+  Mean Importance: 0.0826
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [97, 195, 121, 189, 16]
+  Top-5 Values: ['1.0000', '0.8256', '0.6770', '0.6252', '0.5513']
+
+Layer: LF_l5_FDCA.semantic_att.linear
+  Features: 256
+  Mean Importance: 0.0826
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [97, 195, 121, 189, 16]
+  Top-5 Values: ['1.0000', '0.8256', '0.6770', '0.6252', '0.5513']
+
+Layer: LF_l5_FDCA.semantic_att
+  Features: 8
+  Mean Importance: 0.2207
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 1, 2, 6]
+  Top-5 Values: ['1.0000', '0.2942', '0.2942', '0.0753', '0.0753']
+
+Layer: LF_l5_FDCA.positional_att.conv
+  Features: 8
+  Mean Importance: 0.2193
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 2, 6]
+  Top-5 Values: ['1.0000', '0.4057', '0.2039', '0.0763', '0.0541']
+
+Layer: LF_l5_FDCA.positional_att
+  Features: 8
+  Mean Importance: 0.5282
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 6, 2, 5, 3]
+  Top-5 Values: ['1.0000', '0.8818', '0.5663', '0.5568', '0.4996']
+
+Layer: LF_l5_FDCA.slice_att.linear.0
+  Features: 32
+  Mean Importance: 0.3795
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 8, 11, 15, 17]
+  Top-5 Values: ['1.0000', '0.9737', '0.8575', '0.8135', '0.7932']
+
+Layer: LF_l5_FDCA.slice_att.linear.1
+  Features: 32
+  Mean Importance: 0.1563
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 8, 27, 28, 24]
+  Top-5 Values: ['1.0000', '0.9745', '0.6518', '0.5539', '0.3721']
+
+Layer: LF_l5_FDCA.slice_att.linear.2
+  Features: 8
+  Mean Importance: 0.3863
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 4, 3, 0]
+  Top-5 Values: ['1.0000', '0.9970', '0.5027', '0.2416', '0.1942']
+
+Layer: LF_l5_FDCA.slice_att.linear
+  Features: 8
+  Mean Importance: 0.3863
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 7, 4, 3, 0]
+  Top-5 Values: ['1.0000', '0.9970', '0.5027', '0.2416', '0.1942']
+
+Layer: LF_l5_FDCA.slice_att.non_linear
+  Features: 8
+  Mean Importance: 0.1341
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [6, 5, 7, 4, 3]
+  Top-5 Values: ['1.0000', '0.0728', '0.0000', '0.0000', '0.0000']
+
+Layer: LF_l5_FDCA.slice_att.mean
+  Features: 8
+  Mean Importance: 0.2064
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 4]
+  Top-5 Values: ['1.0000', '0.3360', '0.3114', '0.0033', '0.0002']
+
+Layer: LF_l5_FDCA.slice_att.log_diag
+  Features: 8
+  Mean Importance: 0.1539
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.1113', '0.0470', '0.0446', '0.0261']
+
+Layer: LF_l5_FDCA.slice_att.factor
+  Features: 40
+  Mean Importance: 0.1129
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 5, 3, 38, 7]
+  Top-5 Values: ['1.0000', '0.5344', '0.4299', '0.4231', '0.3425']
+
+Layer: LF_l5_FDCA.slice_att
+  Features: 8
+  Mean Importance: 0.1852
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 6, 0, 2, 5]
+  Top-5 Values: ['1.0000', '0.2060', '0.1207', '0.0835', '0.0374']
+
+Layer: LF_l5_FDCA
+  Features: 8
+  Mean Importance: 0.4063
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.7213', '0.5966', '0.3781', '0.3347']
+
+Layer: HF_l4_FDCA.semantic_att.linear.0
+  Features: 8
+  Mean Importance: 0.5239
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 5, 4, 6, 0]
+  Top-5 Values: ['1.0000', '0.9818', '0.7644', '0.5484', '0.3836']
+
+Layer: HF_l4_FDCA.semantic_att.linear.1
+  Features: 8
+  Mean Importance: 0.4197
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 5, 4, 1, 7]
+  Top-5 Values: ['1.0000', '0.9829', '0.7778', '0.3923', '0.2049']
+
+Layer: HF_l4_FDCA.semantic_att.linear.2
+  Features: 128
+  Mean Importance: 0.0565
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [95, 110, 59, 82, 98]
+  Top-5 Values: ['1.0000', '0.4557', '0.3644', '0.3473', '0.2948']
+
+Layer: HF_l4_FDCA.semantic_att.linear
+  Features: 128
+  Mean Importance: 0.0565
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [95, 110, 59, 82, 98]
+  Top-5 Values: ['1.0000', '0.4557', '0.3644', '0.3473', '0.2948']
+
+Layer: HF_l4_FDCA.semantic_att
+  Features: 16
+  Mean Importance: 0.2126
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.4569', '0.4569', '0.3033', '0.3033']
+
+Layer: HF_l4_FDCA.positional_att.conv
+  Features: 16
+  Mean Importance: 0.1895
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 0, 14, 2, 15]
+  Top-5 Values: ['1.0000', '0.9940', '0.2811', '0.2285', '0.1418']
+
+Layer: HF_l4_FDCA.positional_att
+  Features: 16
+  Mean Importance: 0.2839
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 0, 2, 3, 13]
+  Top-5 Values: ['1.0000', '0.6937', '0.4094', '0.3995', '0.3256']
+
+Layer: HF_l4_FDCA.slice_att.linear.0
+  Features: 64
+  Mean Importance: 0.2836
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [35, 0, 38, 10, 43]
+  Top-5 Values: ['1.0000', '0.9846', '0.8409', '0.7531', '0.6920']
+
+Layer: HF_l4_FDCA.slice_att.linear.1
+  Features: 64
+  Mean Importance: 0.1703
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [35, 10, 43, 47, 53]
+  Top-5 Values: ['1.0000', '0.7549', '0.6942', '0.6562', '0.6219']
+
+Layer: HF_l4_FDCA.slice_att.linear.2
+  Features: 16
+  Mean Importance: 0.2981
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 1, 0, 10, 14]
+  Top-5 Values: ['1.0000', '0.6974', '0.6800', '0.5714', '0.4209']
+
+Layer: HF_l4_FDCA.slice_att.linear
+  Features: 16
+  Mean Importance: 0.2981
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 1, 0, 10, 14]
+  Top-5 Values: ['1.0000', '0.6974', '0.6800', '0.5714', '0.4209']
+
+Layer: HF_l4_FDCA.slice_att.non_linear
+  Features: 16
+  Mean Importance: 0.2835
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 12, 0, 6, 14]
+  Top-5 Values: ['1.0000', '0.8612', '0.6120', '0.5369', '0.3996']
+
+Layer: HF_l4_FDCA.slice_att.mean
+  Features: 16
+  Mean Importance: 0.0790
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 2, 14]
+  Top-5 Values: ['1.0000', '0.1810', '0.0498', '0.0171', '0.0071']
+
+Layer: HF_l4_FDCA.slice_att.log_diag
+  Features: 16
+  Mean Importance: 0.1094
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 15, 1, 14, 2]
+  Top-5 Values: ['1.0000', '0.3526', '0.2996', '0.0571', '0.0245']
+
+Layer: HF_l4_FDCA.slice_att.factor
+  Features: 80
+  Mean Importance: 0.0420
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [4, 2, 77, 3, 75]
+  Top-5 Values: ['1.0000', '0.4426', '0.3088', '0.2678', '0.2520']
+
+Layer: HF_l4_FDCA.slice_att
+  Features: 16
+  Mean Importance: 0.2214
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [15, 0, 2, 3, 13]
+  Top-5 Values: ['1.0000', '0.9449', '0.2484', '0.2357', '0.2170']
+
+Layer: HF_l4_FDCA
+  Features: 16
+  Mean Importance: 0.4094
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 8, 15, 7, 2]
+  Top-5 Values: ['1.0000', '0.8403', '0.6486', '0.5406', '0.4501']
+
+Layer: HF_l5_FDCA.semantic_att.linear.0
+  Features: 16
+  Mean Importance: 0.1244
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 13, 1, 2, 3]
+  Top-5 Values: ['1.0000', '0.6572', '0.2773', '0.0142', '0.0133']
+
+Layer: HF_l5_FDCA.semantic_att.linear.1
+  Features: 16
+  Mean Importance: 0.0625
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 15, 14, 13, 12]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: HF_l5_FDCA.semantic_att.linear.2
+  Features: 256
+  Mean Importance: 0.0910
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [185, 26, 141, 121, 192]
+  Top-5 Values: ['1.0000', '0.9384', '0.6246', '0.5185', '0.4395']
+
+Layer: HF_l5_FDCA.semantic_att.linear
+  Features: 256
+  Mean Importance: 0.0910
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [185, 26, 141, 121, 192]
+  Top-5 Values: ['1.0000', '0.9384', '0.6246', '0.5185', '0.4395']
+
+Layer: HF_l5_FDCA.semantic_att
+  Features: 8
+  Mean Importance: 0.2687
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.4017', '0.4017', '0.1487', '0.1487']
+
+Layer: HF_l5_FDCA.positional_att.conv
+  Features: 8
+  Mean Importance: 0.2693
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 1, 7, 6, 2]
+  Top-5 Values: ['1.0000', '0.7731', '0.1430', '0.1085', '0.1063']
+
+Layer: HF_l5_FDCA.positional_att
+  Features: 8
+  Mean Importance: 0.2267
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 6, 2, 1]
+  Top-5 Values: ['1.0000', '0.3240', '0.2012', '0.1696', '0.0560']
+
+Layer: HF_l5_FDCA.slice_att.linear.0
+  Features: 32
+  Mean Importance: 0.4796
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [3, 8, 6, 19, 23]
+  Top-5 Values: ['1.0000', '0.9972', '0.9664', '0.8945', '0.8531']
+
+Layer: HF_l5_FDCA.slice_att.linear.1
+  Features: 32
+  Mean Importance: 0.3740
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [8, 6, 19, 23, 13]
+  Top-5 Values: ['1.0000', '0.9698', '0.8992', '0.8586', '0.8010']
+
+Layer: HF_l5_FDCA.slice_att.linear.2
+  Features: 8
+  Mean Importance: 0.3999
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 3, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.7633', '0.7475', '0.6275', '0.0242']
+
+Layer: HF_l5_FDCA.slice_att.linear
+  Features: 8
+  Mean Importance: 0.3999
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 3, 1, 6, 2]
+  Top-5 Values: ['1.0000', '0.7633', '0.7475', '0.6275', '0.0242']
+
+Layer: HF_l5_FDCA.slice_att.non_linear
+  Features: 8
+  Mean Importance: 0.1250
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 5, 4]
+  Top-5 Values: ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+
+Layer: HF_l5_FDCA.slice_att.mean
+  Features: 8
+  Mean Importance: 0.2454
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 2, 4]
+  Top-5 Values: ['1.0000', '0.5574', '0.1877', '0.1227', '0.0540']
+
+Layer: HF_l5_FDCA.slice_att.log_diag
+  Features: 8
+  Mean Importance: 0.2180
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 7, 6, 4, 2]
+  Top-5 Values: ['1.0000', '0.4573', '0.1549', '0.0526', '0.0518']
+
+Layer: HF_l5_FDCA.slice_att.factor
+  Features: 40
+  Mean Importance: 0.1389
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [1, 0, 35, 3, 7]
+  Top-5 Values: ['1.0000', '0.8462', '0.8232', '0.4433', '0.4328']
+
+Layer: HF_l5_FDCA.slice_att
+  Features: 8
+  Mean Importance: 0.1738
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [7, 0, 2, 6, 1]
+  Top-5 Values: ['1.0000', '0.1908', '0.0693', '0.0647', '0.0498']
+
+Layer: HF_l5_FDCA
+  Features: 8
+  Mean Importance: 0.5114
+  Max Importance: 1.0000
+  Min Importance: 0.0000
+  Top-5: [0, 4, 1, 7, 3]
+  Top-5 Values: ['1.0000', '0.8046', '0.6440', '0.5342', '0.4952']
+
+======================================================================
+✓ Mechanistic analysis complete
+
+[3] Generating Grad-CAM...
+❌ Warning: Grad-CAM generation failed: Output 0 of BackwardHookFunctionBackward is a view and is being modified inplace. This view was created inside a custom Function (or because an input was returned as-is) and the autograd logic to handle view+inplace would override the custom backward associated with the custom Function, leading to incorrect gradients. This behavior is forbidden. You can fix this by cloning the output of the custom Function.
+Traceback (most recent call last):
+  File "/home/manish/BrainTumorHFF/HFF/eval_new.py", line 320, in evaluate_batch
+    output = self.model(low_input, high_input)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 438, in forward
+    layer1_LF, layer2_LF, layer3_LF, layer4_LF_1, layer5_LF_1 = self.mobilenet_encoder_b1(input1)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 104, in forward
+    f1 = self.enc1(x)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/model/HFF_MobileNetV3_fixed.py", line 84, in forward
+    return x + self.conv(x)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1538, in _call_impl
+    result = forward_call(*args, **kwargs)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 103, in forward
+    return F.relu(input, inplace=self.inplace)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/functional.py", line 1455, in relu
+    result = torch.relu_(input)
+RuntimeError: Output 0 of BackwardHookFunctionBackward is a view and is being modified inplace. This view was created inside a custom Function (or because an input was returned as-is) and the autograd logic to handle view+inplace would override the custom backward associated with the custom Function, leading to incorrect gradients. This behavior is forbidden. You can fix this by cloning the output of the custom Function.
+[4] Analyzing frequency components...
+Warning: Frequency analysis failed: Can't call numpy() on Tensor that requires grad. Use tensor.detach().numpy() instead.
+✓ Evaluation complete for sample_0002
+Evaluating:   8%|7         | 3/38 [00:39<07:09, 12.28s/it]Evaluating:   8%|7         | 3/38 [00:42<08:19, 14.26s/it]
+
+
+======================================================================
+Running standard validation pass (for exact print_val_loss/print_val_eval output)...
+======================================================================
+
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+[*] Load /home/manish/BrainTumorHFF/HFF/data/brats20/final/0-test.txt, which contains 38 paired volume
+modilities: ['flair_L', 't1_L', 't1ce_L', 't2_L', 'flair_H1', 'flair_H2', 'flair_H3', 'flair_H4', 't1_H1', 't1_H2', 't1_H3', 't1_H4', 't1ce_H1', 't1ce_H2', 't1ce_H3', 't1ce_H4', 't2_H1', 't2_H2', 't2_H3', 't2_H4']
+Validation Pass (printing):   0%|          | 0/38 [00:00<?, ?it/s]Validation Pass (printing):   3%|2         | 1/38 [00:06<03:46,  6.13s/it]Validation Pass (printing):   5%|5         | 2/38 [00:08<02:12,  3.67s/it]Validation Pass (printing):   8%|7         | 3/38 [00:09<01:38,  2.82s/it]Validation Pass (printing):  11%|#         | 4/38 [00:11<01:24,  2.47s/it]Validation Pass (printing):  13%|#3        | 5/38 [00:13<01:14,  2.27s/it]Validation Pass (printing):  16%|#5        | 6/38 [00:15<01:07,  2.12s/it]Validation Pass (printing):  18%|#8        | 7/38 [00:17<01:02,  2.03s/it]Validation Pass (printing):  21%|##1       | 8/38 [00:19<00:59,  1.99s/it]Validation Pass (printing):  24%|##3       | 9/38 [00:21<00:57,  2.00s/it]Validation Pass (printing):  26%|##6       | 10/38 [00:23<00:55,  1.97s/it]Validation Pass (printing):  29%|##8       | 11/38 [00:25<00:55,  2.04s/it]Validation Pass (printing):  32%|###1      | 12/38 [00:27<00:53,  2.06s/it]Validation Pass (printing):  34%|###4      | 13/38 [00:29<00:53,  2.13s/it]Validation Pass (printing):  37%|###6      | 14/38 [00:31<00:50,  2.11s/it]Validation Pass (printing):  39%|###9      | 15/38 [00:34<00:49,  2.14s/it]Validation Pass (printing):  42%|####2     | 16/38 [00:36<00:48,  2.22s/it]Validation Pass (printing):  45%|####4     | 17/38 [00:38<00:46,  2.24s/it]Validation Pass (printing):  47%|####7     | 18/38 [00:41<00:45,  2.29s/it]Validation Pass (printing):  50%|#####     | 19/38 [00:43<00:42,  2.26s/it]Validation Pass (printing):  50%|#####     | 19/38 [00:45<00:45,  2.38s/it]
+Traceback (most recent call last):
+  File "/home/manish/BrainTumorHFF/HFF/eval_new.py", line 618, in <module>
+    loss1 = criterion(outputs_val_1_cpu, mask_cpu)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/loss/loss_function.py", line 137, in forward
+    return self._base_forward(output, target_one_hot, valid_mask)
+  File "/home/manish/BrainTumorHFF/HFF/loss/loss_function.py", line 91, in _base_forward
+    dice_loss = dice(predict[:, i], target[..., i], valid_mask)
+  File "/home/manish/.conda/envs/hff-xai/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/manish/BrainTumorHFF/HFF/loss/loss_function.py", line 52, in forward
+    target = target.contiguous().view(target.shape[0], -1).float()
+KeyboardInterrupt
